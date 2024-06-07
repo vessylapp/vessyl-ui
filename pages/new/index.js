@@ -25,7 +25,7 @@ export default function NewResource() {
         });
         const data = await response.json();
         if (data.success) {
-            router.push("/dashboard");
+            router.push("/resource/" + resourceName);
         } else {
             setError(data.error);
         }

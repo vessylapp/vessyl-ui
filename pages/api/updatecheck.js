@@ -5,25 +5,15 @@ export default async function handler(req, res) {
     const dataToSend = {
         needsUpdate: false,
     };
-    const response = await fetch(process.env.API_URL + "/status", {
+    const {version} = packageJson;
+    const response = await fetch(process.env.API_URL + "/status?cv=" + version, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
         },
     });
     const data = await response.json();
-    if (data.version !== process.env.VERSION) {
-        dataToSend.needsUpdate = true;
-    }
-    const versionOfUI = packageJson.version;
-    const UIresponse = await fetch("https://api.github.com/repos/vessylapp/vessyl-ui/releases/latest", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-    const UIData = await UIresponse.json();
-    if (UIData.tag_name !== versionOfUI) {
+    if(data.needsUpdate) {
         dataToSend.needsUpdate = true;
     }
     res.json(dataToSend);
