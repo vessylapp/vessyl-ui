@@ -34,9 +34,13 @@ export default function Container() {
             setLogs(data);
         }
         getLogs();
-        setInterval(() => {
+        const intervalId = setInterval(() => {
             getLogs();
         }, 1500);
+    
+        return () => {
+            clearInterval(intervalId);
+        };
     }, [])
 
     return (

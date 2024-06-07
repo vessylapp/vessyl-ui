@@ -38,6 +38,10 @@ export default function Dashboard() {
                 }),
             });
             const cdata = await cres.json();
+            if(cdata.error) {
+                localStorage.removeItem("token");
+                return router.push("/login");
+            }
             setContainers(cdata);
 
             const dres = await fetch("/api/resources", {

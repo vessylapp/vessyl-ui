@@ -1,6 +1,6 @@
 "use client";
 import Link from 'next/link'
-import {useState, useEffect} from "react";
+import {useState, useEffect, useRef} from "react";
 import { useRouter } from 'next/router';
 import React from 'react';
 
@@ -13,7 +13,14 @@ export default function Resource() {
     const [volumes, setVolumes] = useState("");
     const [deploying, setDeploying] = useState(false);
     const [deployStream, setDeployStream] = useState("");
+    const preRef = useRef(null);
     const router = useRouter();
+
+    useEffect(() => {
+        if (preRef.current) {
+          preRef.current.scrollTop = preRef.current.scrollHeight;
+        }
+      }, [deployStream]);
 
     async function deploy() {
         setDeployStream("");
@@ -29,28 +36,36 @@ export default function Resource() {
                 name: resource.name,
             }),
         });
+    
         const reader = res.body.getReader();
         let stream = "";
-        let line = "\n";
+        const decoder = new TextDecoder();
+    
         while (true) {
             const { done, value } = await reader.read();
             if (done) {
                 break;
             }
-            const text = new TextDecoder().decode(value);
-            for (let i = 0; i < text.length; i++) {
-                if (text[i] === '\n') {
-                    stream += line;
-                    setDeployStream(stream);
-                    line = "";
-                } else {
-                    line += text[i];
-                }
-            }
+            const text = decoder.decode(value, { stream: true });
+            stream += text;
+    
+            let lines = stream.split(/\r?\n/);
+            stream = lines.pop();
+            
+            setDeployStream((prev) => prev + lines.join("\n") + "\n");
         }
+    
+        if (stream.length > 0) {
+            setDeployStream((prev) => prev + stream);
+        }
+    
+        setDeployStream((prev) => prev + "\nThis will close in 5 seconds.");
+
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
         router.push("/container/" + resource.name);
         setDeploying(false);
-    }
+    }    
 
     async function saveSettings(e){
         e.preventDefault(); 
@@ -176,9 +191,9 @@ export default function Resource() {
             </div>
         )}
         {deploying && (
-            <div className="flex flex-col items-center justify-center min-h-screen py-2">
-                <h1 className="text-4xl font-bold">Deploying {resource.name}</h1>
-                <pre className="text-left bg-gray-100 p-4 rounded w-full max-w-lg overflow-auto">
+            <div className="flex flex-col items-center min-h-screen py-2">
+                <h1 className="text-4xl font-bold mb-3">Deploying {resource.name}</h1>
+                <pre className="text-left bg-gray-100 p-4 rounded w-full h-96 max-w-3xl overflow-auto" ref={preRef}>
                     {deployStream.split('\n').map((line, index) => (
                         <React.Fragment key={index}>
                             {line}
