@@ -13,4 +13,4 @@ COPY . .
 RUN npm run env
 RUN npm run build
 
-ENTRYPOINT [ "npm", "run", "start" ]
+ENTRYPOINT npm run env && npm run build && npm run start
