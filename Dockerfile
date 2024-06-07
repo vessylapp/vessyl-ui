@@ -1,5 +1,7 @@
 FROM node:20
 
+LABEL org.opencontainers.image.source=https://github.com/vessylapp/vessyl-ui
+
 WORKDIR /usr/src/app
 
 COPY package*.json ./
