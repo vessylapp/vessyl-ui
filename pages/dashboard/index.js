@@ -9,6 +9,7 @@ export default function Dashboard() {
     const [isLogged, setIsLogged] = useState(false);
     const [containers, setContainers] = useState([]);
     const [resources, setResources] = useState([]);
+    const [needsUpdate, setNeedsUpdate] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -19,6 +20,14 @@ export default function Dashboard() {
             router.push("/login")
         }
         async function getData() {
+            const updateRes = await fetch("/api/updatecheck", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            const updateData = await updateRes.json();
+            setNeedsUpdate(updateData.needsUpdate);
             const cres = await fetch("/api/containers", {
                 method: "POST",
                 headers: {
@@ -48,6 +57,13 @@ export default function Dashboard() {
 
     return (
         <div className="w-3/4 mx-auto">
+            {needsUpdate && (
+                <div className="p-4 bg-red-500 text-white rounded-xl text-sm mb-4">
+                    <h2 className="font-bold text-lg mb-2">New Update Available!</h2>
+                    <p className="mb-2">A new version of the app is available. For the best experience, we recommend you to update the app.</p>
+                    <button onClick={() => router.push("/update")} className="p-2 bg-yellow-500 text-white rounded-xl text-sm font-bold">Update Now</button>
+                </div>
+            )}
             <div className='flex justify-between items-center'>
                 <h1 className="text-2xl font-bold">Resources</h1>
                 <Link href="/new" className="p-2 bg-yellow-500 text-white rounded-xl text-sm">New</Link>
