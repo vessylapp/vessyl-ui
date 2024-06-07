@@ -10,17 +10,21 @@ export default function Home() {
   const [isLogged, setIsLogged] = useState(false)
   const router = useRouter();
 
-  useEffect(async () => {
-    const apiStatus = await fetch("/api/status");
-    const apiStatusData = await apiStatus.json();
-    if(apiStatusData.setup === false) {
-      return router.push("/register");
-    }
-    const token = localStorage.getItem("token")
-    if (token) {
-      setIsLogged(true);
-      router.push("/dashboard");
-    }
+  useEffect(() => {
+    const checkStatusAndNavigate = async () => {
+      const apiStatus = await fetch("/api/status");
+      const apiStatusData = await apiStatus.json();
+      if(apiStatusData.setup === false) {
+        return await router.push("/register");
+      }
+      const token = localStorage.getItem("token")
+      if (token) {
+        setIsLogged(true);
+        await router.push("/dashboard");
+      }
+    };
+  
+    checkStatusAndNavigate();
   }, [])
 
   return (
