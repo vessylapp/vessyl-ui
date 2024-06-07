@@ -10,7 +10,4 @@ RUN npm install
 
 COPY . .
 
-RUN npm run env
-RUN npm run build
-
 ENTRYPOINT npm run env && npm run build && npm run start
