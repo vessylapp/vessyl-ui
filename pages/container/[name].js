@@ -9,6 +9,7 @@ export default function Container() {
     const [logs, setLogs] = useState("");
     const [containerName, setContainerName] = useState("");
     const router = useRouter();
+    const [running, setRunning] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -19,6 +20,21 @@ export default function Container() {
             return;
         }
         setContainerName(window.location.pathname.split("/")[2]);
+        async function getContainer() {
+            const res = await fetch("/api/containerinfo", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    token,
+                    name: window.location.pathname.split("/")[2],
+                }),
+            });
+            const data = await res.json();
+            setRunning(data.State.Running);
+        }
+        getContainer();
         async function getLogs() {
             const res = await fetch("/api/containerlogs", {
                 method: "POST",
@@ -37,7 +53,6 @@ export default function Container() {
         const intervalId = setInterval(() => {
             getLogs();
         }, 1500);
-    
         return () => {
             clearInterval(intervalId);
         };
