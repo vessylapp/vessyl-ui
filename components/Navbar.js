@@ -1,16 +1,18 @@
 "use client";
 import Link from 'next/link'
 import {useState, useEffect} from "react";
+import {useRouter} from "next/router";
 
 export default function Navbar() {
     const [isLogged, setIsLogged] = useState(false)
+    const router = useRouter()
 
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (token !== null && token !== undefined) {
             setIsLogged(true)
         }
-    }, [])
+    }, [router.pathname])
 
     return (
         <nav className="w-full flex items-center justify-between p-6 bg-white text-black z-50">
