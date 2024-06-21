@@ -64,6 +64,12 @@ export default function Settings() {
         window.location.reload();
     }
 
+    async function generateLink() {
+        const link = "https://github.com/settings/tokens/new?scopes=repo,repo:status,repo_deployment,public_repo,repo:invite,security_events,read:packages,read:org,read:public_key,user,read:user,user:email,read:project,read:gpg_key,read:ssh_key"
+
+        window.open(link, "_blank");
+    }
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen py-2">
             <h1 className="text-4xl mb-5 font-bold">Settings</h1>
@@ -89,6 +95,7 @@ export default function Settings() {
                                        onChange={(e) => setPat(e.target.value)}
                                        className={"w-full border-2 px-3 py-2 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300"}/>
                                 <button onClick={connectBtnPressed} className="mt-3">Connect</button>
+                                <button onClick={generateLink} className="mt-3">Generate PAT</button>
                             </>
                         )}
                     </>
