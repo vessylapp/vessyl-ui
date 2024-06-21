@@ -68,7 +68,13 @@ export default function Update() {
         ) : (
             <div className="flex flex-col items-center justify-center h-screen">
                 <h1 className="text-4xl font-bold">Update Vessyl</h1>
-                {error && <p className="text-red-500">{error}</p>}
+                {error &&
+                    <>
+                        <p className="text-2xl">An error occurred while updating Vessyl.</p>
+                        <p className="text-red-500">{error}</p>
+                        <p className={"text-2xl mt-2"}>Not an admin? Tell the admin to update Vessyl.</p>
+                    </>
+                }
                 <p className="text-2xl">An update is available for Vessyl. Please update to the latest version.</p>
                 <button className="p-2 bg-yellow-500 text-white rounded-lg text-lg font-bold mt-5" onClick={update}>Update Now</button>
             </div>
