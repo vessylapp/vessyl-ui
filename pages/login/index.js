@@ -9,7 +9,8 @@ export default function Login() {
     const [error, setError] = useState("");
     const router = useRouter();
 
-    async function login() {
+    async function login(e) {
+        e.preventDefault();
         const res = await fetch("/api/login", {
             method: "POST",
             headers: {
@@ -37,7 +38,7 @@ export default function Login() {
     }, []);
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen py-2">
+        <form onSubmit={login} className="flex flex-col items-center justify-center min-h-screen py-2">
             <h1 className="text-4xl mb-5 font-bold">Welcome to Vessyl.</h1>
             <input
                 type="text"
@@ -60,6 +61,6 @@ export default function Login() {
                 Login
             </button>
             {error && <p className="text-red-500 mt-2">{error}</p>}
-        </div>
+        </form>
     );
 }

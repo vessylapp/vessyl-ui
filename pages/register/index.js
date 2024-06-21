@@ -11,7 +11,8 @@ export default function Register() {
     const [error, setError] = useState("");
     const router = useRouter();
 
-    async function register() {
+    async function register(e) {
+        e.preventDefault();
         if (password !== passwordConfirm) {
             return setError("Passwords do not match.");
         }
@@ -53,7 +54,7 @@ export default function Register() {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen py-2">
             {registrationEnabled ? (
-                <div className="flex flex-col items-center justify-center min-h-screen py-2">
+                <form onSubmit={register} className="flex flex-col items-center justify-center min-h-screen py-2">
                     <h1 className="text-4xl mb-5 font-bold">Welcome to Vessyl.</h1>
                     {!isSetup && (
                         <p className="text-sm mb-5 text-red-500">
@@ -88,7 +89,7 @@ export default function Register() {
                         Register
                     </button>
                     {error && <p className="text-red-500 mt-3">{error}</p>}
-                </div>
+                </form>
             ) : (
                 <h1 className="text-6xl font-bold">Registration is disabled.</h1>
             )}

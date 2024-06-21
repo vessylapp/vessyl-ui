@@ -23,6 +23,7 @@ export default function Resource() {
       }, [deployStream]);
 
     async function deploy() {
+        await saveSettings();
         setDeployStream("");
         setDeploying(true);
         const token = localStorage.getItem("token");
@@ -67,8 +68,8 @@ export default function Resource() {
         setDeploying(false);
     }    
 
-    async function saveSettings(e){
-        e.preventDefault(); 
+    async function saveSettings(){
+        // e.preventDefault();
         let newEnvVariables = "";
         let newPorts = "";
         let newVolumes = "";
@@ -186,7 +187,6 @@ export default function Resource() {
                         Volumes:
                         <input type="text" className="border-2 rounded p-2 w-full" onChange={(e) => setVolumes(e.target.value)} value={volumes}/>
                     </label>
-                    <button type="submit" className="p-2 bg-green-500 text-white rounded mt-4">Save</button>
                 </form>
             </div>
         )}

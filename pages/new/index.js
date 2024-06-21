@@ -40,7 +40,13 @@ export default function NewResource() {
                 placeholder="Resource name"
                 className="p-2 m-2 border-2 rounded-lg"
                 value={resourceName}
-                onChange={(e) => setResourceName(e.target.value)}
+                onChange={(e) => {
+                    const value = e.target.value;
+                    const lowerCaseValue = value.toLowerCase();
+                    const noSpacesValue = lowerCaseValue.replace(/\s+/g, '-');
+                    const cleanValue = noSpacesValue.replace(/[^a-z0-9-]/g, '');
+                    setResourceName(cleanValue);
+                }}
             />
             <input
                 type="text"
