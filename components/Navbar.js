@@ -25,6 +25,11 @@ export default function Navbar() {
                         Login
                     </Link>
                 )}
+                {isLogged && (
+                    <Link href="/settings" className="hover:text-yellow-500 transition-all duration-300">
+                        Settings
+                    </Link>
+                )}
             </div>
         </nav>
     )
