@@ -1,10 +1,3 @@
-import {Chip} from "@nextui-org/react";
-import {Icon} from "@iconify/react";
-
-import {SidebarItemType} from "./sidebarf";
-import TeamAvatar from "./team-avatar";
-
-
 export const items = [
     {
         key: "home",
