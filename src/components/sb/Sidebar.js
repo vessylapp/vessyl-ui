@@ -37,8 +37,9 @@ export default function Sidebar() {
                     {update ? (
                         <Chip
                             color="warning"
+                            className={"ml-5"}
                             variant="solid">
-                            Update Available
+                            Update
                         </Chip>
                     ) : (
                         <Chip

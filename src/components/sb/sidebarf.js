@@ -4,6 +4,7 @@ import {Accordion, AccordionItem} from "@nextui-org/react";
 import React from "react";
 import {Listbox, Tooltip, ListboxItem, ListboxSection} from "@nextui-org/react";
 import {Icon} from "@iconify/react";
+import {useRouter} from "next/navigation";
 
 import {cn} from "@/components/cn";
 
@@ -31,6 +32,20 @@ const Sidebar = React.forwardRef(
         ref,
     ) => {
         const [selected, setSelected] = React.useState(defaultSelectedKey);
+
+        const router = useRouter();
+
+        React.useEffect(() => {
+            const itemThatMatchesCurrentPath = items.find((item) => {
+                return item.href === window.location.pathname;
+            });
+
+            console.log(itemThatMatchesCurrentPath);
+
+            if (itemThatMatchesCurrentPath) {
+                setSelected(itemThatMatchesCurrentPath.key);
+            }
+        }, [router]);
 
         const sectionClasses = {
             ...sectionClassesProp,
@@ -162,7 +177,7 @@ const Sidebar = React.forwardRef(
                     </ListboxItem>
                 );
             },
-            [isCompact, hideEndContent, iconClassName, items],
+            [isCompact, hideEndContent, iconClassName, items, router],
         );
 
         const renderItem = React.useCallback(
@@ -217,7 +232,7 @@ const Sidebar = React.forwardRef(
                     </ListboxItem>
                 );
             },
-            [isCompact, hideEndContent, iconClassName, itemClasses?.base],
+            [isCompact, hideEndContent, iconClassName, itemClasses?.base, router],
         );
 
         return (
@@ -250,8 +265,9 @@ const Sidebar = React.forwardRef(
                 onSelectionChange={(keys) => {
                     const key = Array.from(keys)[0];
 
+                    console.log("HI", key);
                     setSelected(key);
-                    onSelect?.(key);
+                    // onSelect?.(key);
                 }}
                 {...props}
             >

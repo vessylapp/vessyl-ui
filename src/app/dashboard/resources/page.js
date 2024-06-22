@@ -2,12 +2,12 @@
 
 import Sidebar from "@/components/sb/Sidebar";
 
-export default function Dashboard() {
+export default function Resources() {
     return (
         <>
-            <Sidebar/>
+        <Sidebar/>
             <div className={"p-6"}>
-                <h1 className={"text-3xl font-bold"}>Dashboard</h1>
+                <h1 className={"text-3xl font-bold"}>Resources</h1>
             </div>
         </>
     )
