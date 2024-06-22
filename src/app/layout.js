@@ -1,7 +1,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import * as React from "react";
-import {NextUIProvider} from "@nextui-org/system";
+import Providers from "@/app/providers";
 import Navbar from "@/components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -15,12 +15,11 @@ export default function RootLayout({ children }) {
     return (
         <html lang="en" className={"dark"}>
         <body className={inter.className}>
-        <NextUIProvider>
-        <Navbar/>
-        <div className={"p-6"}>
+        <Providers>
+        <div>
             {children}
         </div>
-        </NextUIProvider>
+        </Providers>
         </body>
         </html>
     );

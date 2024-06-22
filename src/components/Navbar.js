@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Chip, Button} from "@nextui-org/react";
-import {checkForUpdates} from "@/funcs/status"
-import {isLoggedIn} from "@/funcs/isLoggedIn";
+import {checkForUpdates} from "@/funcs/server/status"
+import {isLoggedIn} from "@/funcs/client/isLoggedIn";
 
 export default async function Navbar() {
     const {update, version} = await checkForUpdates();

@@ -18,7 +18,7 @@ export async function status(vers = "") {
 }
 
 export async function checkForUpdates() {
-    const pkgJson = require("../../package.json");
+    const pkgJson = require("../../../package.json");
     const {version} = JSON.parse(JSON.stringify(pkgJson));
     const statusData = await status(version);
     const needsUpdate = statusData.needsUpdate;
