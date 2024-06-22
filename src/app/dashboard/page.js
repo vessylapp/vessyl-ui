@@ -2,6 +2,6 @@
 
 export default function Dashboard() {
     return (
-        <p>Dashboard</p>
+        <h1 className={"text-3xl font-bold"}>Dashboard</h1>
     )
 }
