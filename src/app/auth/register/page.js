@@ -6,6 +6,7 @@ import {Icon} from "@iconify/react";
 import {status} from "@/funcs/client/status";
 import {register} from "@/funcs/client/auth";
 import {useRouter} from "next/navigation";
+import {isLoggedIn} from "@/funcs/client/isLoggedIn";
 
 export default function Register() {
     const [isVisible, setIsVisible] = React.useState(false);
@@ -16,6 +17,10 @@ export default function Register() {
 
     useEffect(() => {
         async function fetchData() {
+            const areWeLoggedIn = await isLoggedIn();
+            if(areWeLoggedIn) {
+                return router.push("/dashboard");
+            }
             const data = await status();
             setServerSettings(data);
             setRegistrationEnabled(data.registration);

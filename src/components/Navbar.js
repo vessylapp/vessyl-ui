@@ -1,11 +1,30 @@
+"use client";
 import Link from 'next/link'
 import { Chip, Button} from "@nextui-org/react";
-import {checkForUpdates} from "@/funcs/server/status"
+import {checkForUpdates} from "@/funcs/client/status"
 import {isLoggedIn} from "@/funcs/client/isLoggedIn";
+import {useEffect, useState} from "react";
+import {useRouter} from "next/navigation";
 
-export default async function Navbar() {
-    const {update, version} = await checkForUpdates();
-    const loggedIn = await isLoggedIn();
+export default function Navbar() {
+    const [loggedIn, setLoggedIn] = useState(false);
+    const [update, setUpdate] = useState(false);
+    const [version, setVersion] = useState("0.0.0");
+    const router = useRouter();
+
+    useEffect(() => {
+        async function fetchData() {
+            const areWeLoggedIn = await isLoggedIn();
+            if (!areWeLoggedIn) {
+                return router.push("/auth/login");
+            }
+            const data = await checkForUpdates();
+            console.log(data);
+            setUpdate(data.update);
+            setVersion(data.version);
+        }
+        fetchData();
+    }, []);
 
     return (
         <nav className="w-full flex items-center justify-between p-6 z-50">
