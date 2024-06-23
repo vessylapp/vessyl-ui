@@ -1,4 +1,4 @@
-import {Card, Image, Divider, CardBody, CardHeader} from "@nextui-org/react";
+import {Card, Divider, CardBody, CardHeader} from "@nextui-org/react";
 
 const ContainerCard = ({ container }) => {
     const borderColor = container.running ? 'border-green-500' : 'border-red-500';
