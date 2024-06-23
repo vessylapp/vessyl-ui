@@ -75,11 +75,15 @@ export default function Update() {
                         <p className={"text-2xl mt-2"}>Not an admin? Tell the admin to update Vessyl.</p>
                     </>
                 }
-                <p className="text-2xl">An update is available for Vessyl. Please update to the latest version.</p>
-                <button className="p-2 bg-yellow-500 text-white rounded-lg text-lg font-bold mt-5" onClick={update}>Update Now</button>
-            </div>
-        )
-        }
-        </>
+                {!error && (
+                    <>
+                    <p className="text-2xl">An update is available for Vessyl. Please update to the latest version.</p>
+                    <button className="p-2 bg-yellow-500 text-white rounded-lg text-lg font-bold mt-5" onClick={update}>Update Now</button>
+                    </>
+                )}
+        </div>
     )
+}
+</>
+)
 }
