@@ -31,7 +31,7 @@ const Sidebar = React.forwardRef(
         },
         ref,
     ) => {
-        const [selected, setSelected] = React.useState(defaultSelectedKey);
+        const [selected, setSelected] = React.useState("");
 
         const router = useRouter();
 
