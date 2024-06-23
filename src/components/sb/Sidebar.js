@@ -12,7 +12,8 @@ import {checkForUpdates} from "@/funcs/client/status";
 
 export default function Sidebar() {
     const [update, setUpdate] = useState(false);
-    const [version, setVersion] = useState("0.0.0");
+    const [uiVersion, setUiVersion] = useState("");
+    const [workerVersion, setWorkerVersion] = useState("");
     const router = useRouter();
 
     useEffect(() => {
@@ -24,7 +25,8 @@ export default function Sidebar() {
             const data = await checkForUpdates();
             console.log(data);
             setUpdate(data.update);
-            setVersion(data.version);
+            setUiVersion(data.uiVersion);
+            setWorkerVersion(data.workerVersion);
         }
         fetchData();
     }, []);
@@ -42,17 +44,25 @@ export default function Sidebar() {
                             Update
                         </Chip>
                     ) : (
-                        <Chip
-                            variant="faded"
-                            className={"ml-5"}
-                            color="success"
-                        >
-                            {version}
-                        </Chip>
+                        <div className="flex flex-col ml-3">
+                            <Chip
+                                variant="faded"
+                                color="success"
+                            >
+                                UI: {uiVersion}
+                            </Chip>
+                            <Chip
+                                variant="faded"
+                                color="success"
+                                className={"mt-1"}
+                            >
+                                Worker: {workerVersion}
+                            </Chip>
+                        </div>
                     )}
                 </div>
                 <ScrollShadow className="-mr-6 h-full max-h-full py-[2vh] pr-6">
-                    <Sidebarf defaultSelectedKey="home" items={items} />
+                    <Sidebarf defaultSelectedKey="home" items={items}/>
                 </ScrollShadow>
             </div>
         </div>

@@ -37,10 +37,15 @@ const Sidebar = React.forwardRef(
 
         React.useEffect(() => {
             const itemThatMatchesCurrentPath = items.find((item) => {
-                return item.href === window.location.pathname;
+                // check if window.location.pathname STARTS with item.href
+                if(item.href === "/dashboard" && window.location.pathname === "/dashboard") {
+                    return true;
+                }
+                if(item.href === "/dashboard") {
+                    return false;
+                }
+                return window.location.pathname.startsWith(item.href);
             });
-
-            console.log(itemThatMatchesCurrentPath);
 
             if (itemThatMatchesCurrentPath) {
                 setSelected(itemThatMatchesCurrentPath.key);
