@@ -2,6 +2,9 @@ export const dynamic = 'force-dynamic'
 export async function POST(request) {
     request.headers.set('Cache-Control', 'no-cache');
     const body = await request.json();
+    // require package json and get version
+    const packageJson = require('../../../../package.json');
+    const version = packageJson.version;
     const response = await fetch(process.env.API_URL + "/update", {
         method: "POST",
         headers: {
@@ -9,6 +12,7 @@ export async function POST(request) {
         },
         body: JSON.stringify({
             token: body.token,
+            uiVersion: version,
         }),
     });
     let data = null;
