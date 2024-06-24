@@ -1,7 +1,7 @@
 import {status} from "@/funcs/server/status";
 
 export const dynamic = 'force-dynamic'
-export async function GET(request) {
+export async function POST(request) {
     // stop NextJS from caching this response
     request.headers.set('Cache-Control', 'no-cache');
     const data = await status();

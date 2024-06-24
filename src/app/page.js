@@ -17,6 +17,7 @@ export default async function Home() {
                 return router.push("/dashboard");
             }
             const data = await status();
+            console.log(data);
             setServerSetup(data.setup);
             if(data.setup === false) {
                 return router.push("/auth/register");

@@ -12,6 +12,7 @@ export default function Register() {
     const [isVisible, setIsVisible] = React.useState(false);
     const [serverSettings, setServerSettings] = React.useState(null);
     const [registrationEnabled, setRegistrationEnabled] = React.useState(false);
+    const [setup, setSetup] = React.useState(true);
     const [error, setError] = React.useState(null);
     const router = useRouter();
 
@@ -24,6 +25,7 @@ export default function Register() {
             const data = await status();
             setServerSettings(data);
             setRegistrationEnabled(data.registration);
+            setSetup(data.setup);
         }
         fetchData();
     }, []);
@@ -57,6 +59,7 @@ export default function Register() {
             <div className="flex w-full max-w-sm flex-col gap-4 rounded-large bg-content1 px-8 pb-10 pt-6 shadow-large">
                 <p className="pb-2 text-xl font-medium">Register</p>
                 {error && <p className="text-red-500">{error}</p>}
+                {!setup && <p className={"text-red-500"}>You are creating the admin account. Please do not forget these details.</p>}
                 {!registrationEnabled && (
                     <>
                         <p className="text-red-500">Registration is disabled.</p>

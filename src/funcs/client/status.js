@@ -2,7 +2,7 @@ import pkgJson from "../../../package.json";
 
 export async function status() {
     const response = await fetch("/api/status", {
-        method: "GET",
+        method: "POST",
         headers: {
             "Content-Type": "application/json",
             "Cache-Control": "no-cache",
