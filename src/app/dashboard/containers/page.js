@@ -6,10 +6,12 @@ import {useEffect, useState} from "react";
 import ContainerCard from "@/components/ContainerCard";
 import ContainerCardSkeleton from "@/components/skeletons/ContainerCardSkeleton";
 import {Skeleton} from "@nextui-org/react";
+import {useRouter} from "next/navigation";
 
 export default function Containers() {
     const [containers, setContainers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
 
     useEffect(() => {
         async function fetchData() {

@@ -17,13 +17,6 @@ export default function Container() {
 
     useEffect(() => {
         setName(window.location.pathname.split("/").pop());
-        async function fetchData() {
-            const areWeLoggedIn = await isLoggedIn();
-            if (!areWeLoggedIn) {
-                return router.push("/auth/login");
-            }
-        }
-        fetchData();
         async function getContainerInfo(name) {
             const data = await getContainer(name);
             if(data.error) {
