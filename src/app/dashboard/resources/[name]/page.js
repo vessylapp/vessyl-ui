@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import {useEffect, useState, useRef} from "react";
 import Sidebar from "@/components/sb/Sidebar";
 import {useRouter} from "next/navigation";
 import {getResource} from "@/funcs/client/resources";
@@ -18,9 +18,63 @@ export default function Resource() {
     const [volumes, setVolumes] = useState("");
     const [containerId, setContainerId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [deploying, setDeploying] = useState(false);
+    const [deployStream, setDeployStream] = useState("");
+    const preRef = useRef(null);
 
-    async function saveSettings(e){
-        e.preventDefault();
+    useEffect(() => {
+        if (preRef.current) {
+          preRef.current.scrollTop = preRef.current.scrollHeight;
+        }
+    }, [deployStream]);
+
+    async function deploy() {
+        await saveSettings();
+        setDeployStream("");
+        setDeploying(true);
+        const token = localStorage.getItem("token");
+        const res = await fetch("/api/deployResource", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                token,
+                name
+            }),
+        });
+
+        const reader = res.body.getReader();
+        let stream = "";
+        const decoder = new TextDecoder();
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+                break;
+            }
+            const text = decoder.decode(value, { stream: true });
+            stream += text;
+
+            let lines = stream.split(/\r?\n/);
+            stream = lines.pop();
+
+            setDeployStream((prev) => prev + lines.join("\n") + "\n");
+        }
+
+        if (stream.length > 0) {
+            setDeployStream((prev) => prev + stream);
+        }
+
+        setDeployStream((prev) => prev + "\nThis will close in 5 seconds.");
+
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        return router.push("/dashboard/containers/" + name);
+    }
+
+    async function saveSettings(e = null){
+        if(e) e.preventDefault();
         let newEnvVariables = "";
         let newPorts = "";
         let newVolumes = "";
@@ -108,6 +162,18 @@ export default function Resource() {
         </>
     )
 
+    if (deploying) return (
+        <>
+            <Sidebar/>
+            <div className={"p-6"}>
+                <h1>Deploying {name}</h1>
+                <pre className="border p-2 rounded-md overflow-auto max-h-[90vh] max-w-[175vh]" ref={preRef}>
+                    {deployStream}
+                </pre>
+            </div>
+        </>
+    )
+
     return (
         <>
             <Sidebar/>
@@ -130,7 +196,7 @@ export default function Resource() {
                         </div>
                     )}
                     <div className={"ml-5"}>
-                        <Button auto color={"warning"}>Deploy</Button>
+                        <Button auto color={"warning"} onClick={deploy}>Deploy</Button>
                     </div>
                 </div>
                 {showOverview ? (
