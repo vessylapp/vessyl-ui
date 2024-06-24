@@ -3,8 +3,8 @@
 import {useEffect, useState} from "react";
 import Sidebar from "@/components/sb/Sidebar";
 import {useRouter} from "next/navigation";
-import {isLoggedIn} from "@/funcs/client/isLoggedIn";
-import {getContainer, containerLogs} from "@/funcs/client/containers";
+import {getContainer, containerLogs, startContainer, stopContainer} from "@/funcs/client/containers";
+import {Button, Spinner} from "@nextui-org/react";
 
 export default function Container() {
     const router = useRouter();
@@ -14,6 +14,8 @@ export default function Container() {
     const [className, setClassName] = useState("border-red-500");
     const [logs, setLogs] = useState("");
     const [containerInfo, setContainerInfo] = useState({});
+    const [action, setAction] = useState("");
+    const [actioning, setActioning] = useState(false);
 
     useEffect(() => {
         setName(window.location.pathname.split("/").pop());
@@ -38,6 +40,12 @@ export default function Container() {
         }
         getLogs();
         const intervalId = setInterval(() => {
+            if (!showLogs) {
+                return;
+            }
+            if(!running) {
+                return;
+            }
             getLogs();
         }, 1500);
         return () => {
@@ -45,19 +53,55 @@ export default function Container() {
         };
     }, []);
 
+    async function start() {
+        setAction("Starting");
+        setActioning(true);
+        await startContainer(name);
+        console.log("Started container");
+        window.location.reload();
+    }
+
+    async function stop() {
+        setAction("Stopping");
+        setActioning(true);
+        await stopContainer(name);
+        console.log("Stopped container");
+        window.location.reload();
+    }
+
+    if(actioning) {
+        return (
+            <>
+                <Sidebar/>
+                <div className="flex flex-col min-h-screen p-6">
+                    <h1 className="text-4xl mb-5 font-bold">{action} container</h1>
+                    <p className="mb-2">{action} container {name}</p>
+                    <Spinner size="lg"/>
+                </div>
+            </>
+        )
+    }
+
     return (
         <>
             <Sidebar/>
             <div className={"p-6"}>
                 <div className="flex flex-row mb-4">
                     <h1 className={"text-3xl font-bold border-b-2 " + className}>{name}</h1>
-                    <div className={"ml-5"}>
+                    <div className={"ml-10"}>
                         <button onClick={() => setShowLogs(true)}
                                 className={`transition-all duration-500 px-4 py-2 border-b-2 ${showLogs ? 'border-blue-500' : 'border-gray-500'}`}>Logs
                         </button>
                         <button onClick={() => setShowLogs(false)}
                                 className={`transition-all duration-500 px-4 py-2 border-b-2 ${showLogs ? 'border-gray-500' : 'border-blue-500'}`}>Overview
                         </button>
+                    </div>
+                    <div className={"ml-10"}>
+                        {running ? (
+                            <Button auto color={"danger"} onClick={stop}>Stop</Button>
+                        ) : (
+                            <Button auto color={"success"} onClick={start}>Start</Button>
+                        )}
                     </div>
                 </div>
                 {showLogs ? (

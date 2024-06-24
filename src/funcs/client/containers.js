@@ -41,3 +41,33 @@ export async function containerLogs(name) {
     const data = await response.text();
     return data;
 }
+
+export async function startContainer(name) {
+    const response = await fetch("/api/startContainer", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            token: localStorage.getItem("token"),
+            name
+        })
+    });
+    const data = await response.text();
+    return data;
+}
+
+export async function stopContainer(name) {
+    const response = await fetch("/api/stopContainer", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            token: localStorage.getItem("token"),
+            name
+        })
+    });
+    const data = await response.text();
+    return data;
+}

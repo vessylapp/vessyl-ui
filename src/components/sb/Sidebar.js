@@ -9,6 +9,7 @@ import Sidebarf from "./sidebarf";
 import {useRouter} from "next/navigation";
 import {isLoggedIn} from "@/funcs/client/isLoggedIn";
 import {checkForUpdates} from "@/funcs/client/status";
+import Link from "next/link";
 
 export default function Sidebar() {
     const [update, setUpdate] = useState(false);
@@ -37,12 +38,14 @@ export default function Sidebar() {
                 <div className="flex items-center gap-2 px-2">
                     <span className="text-3xl font-bold">Vessyl</span>
                     {update ? (
-                        <Chip
-                            color="warning"
-                            className={"ml-5"}
-                            variant="solid">
-                            Update
-                        </Chip>
+                        <Link href={"/dashboard/update"}>
+                            <Chip
+                                color="warning"
+                                className={"ml-5"}
+                                variant="solid">
+                                Update
+                            </Chip>
+                        </Link>
                     ) : (
                         <div className="flex flex-col ml-3">
                             <Chip

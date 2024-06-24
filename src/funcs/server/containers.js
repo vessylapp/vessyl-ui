@@ -46,3 +46,31 @@ export async function containerLogs(token, name) {
     const data = await response.text();
     return data;
 }
+
+export async function stopContainer(token, name) {
+    const response = await fetch(process.env.API_URL + "/containers/" + name + "/stop", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            token,
+        })
+    });
+    const data = await response.text()
+    return data;
+}
+
+export async function startContainer(token, name) {
+    const response = await fetch(process.env.API_URL + "/containers/" + name + "/start", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            token,
+        })
+    });
+    const data = await response.text()
+    return data;
+}
