@@ -26,7 +26,7 @@ export default function Settings() {
             setGitHubPatError(data.error);
             return;
         }
-        return router.push("/settings");
+        return window.location.reload();
     }
 
     useEffect(() => {
