@@ -22,7 +22,14 @@ export async function getContainer(token, name) {
             token
         })
     });
-    const data = await response.json();
+    let data;
+    try {
+        data = await response.json();
+    } catch (e) {
+        data = {
+            error: true,
+        };
+    }
     return data;
 }
 

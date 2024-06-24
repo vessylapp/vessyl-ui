@@ -26,6 +26,9 @@ export default function Container() {
         fetchData();
         async function getContainerInfo(name) {
             const data = await getContainer(name);
+            if(data.error) {
+                return router.push("/dashboard/containers");
+            }
             setContainerInfo(data);
             setRunning(data.State.Running);
             if (data.State.Running) {
@@ -66,7 +69,7 @@ export default function Container() {
                 </div>
                 {showLogs ? (
                     <pre className="border p-2 rounded-md overflow-auto max-h-[90vh] max-w-[175vh]">
-                        {logs}
+                        {logs === "" ? "No logs available" : logs}
                     </pre>
                 ) : (
                     <div className={"border p-2 rounded-md overflow-auto max-h-[90vh] max-w-[175vh]"}>
