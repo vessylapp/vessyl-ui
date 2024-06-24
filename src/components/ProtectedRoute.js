@@ -19,6 +19,7 @@ export default function ProtectedRoute({children}) {
                 return router.push("/auth/login");
             }
         }
+        fetchData();
     }, []);
     return children;
 }
