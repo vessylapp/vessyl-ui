@@ -16,6 +16,7 @@ export default function Resource() {
     const [network, setNetwork] = useState("");
     const [ports, setPorts] = useState("");
     const [volumes, setVolumes] = useState("");
+    const [domain, setDomain] = useState("");
     const [containerId, setContainerId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [deploying, setDeploying] = useState(false);
@@ -87,6 +88,7 @@ export default function Resource() {
         if(network !== "") bodyToGive.network = network;
         if(newPorts !== "") bodyToGive.ports = newPorts;
         if(newVolumes !== "") bodyToGive.volumes = newVolumes;
+        if(domain !== "") bodyToGive.domain = domain;
         const res = await fetch("/api/saveResourceSettings", {
             method: "POST",
             headers: {
@@ -144,6 +146,9 @@ export default function Resource() {
                     }
                 })
                 setVolumes(volumes);
+            }
+            if(data.domain) {
+                setDomain(data.domain);
             }
             setContainerId(data.container.container_id)
             setResourceInfo(data);
@@ -224,6 +229,9 @@ export default function Resource() {
                             />
                             <Input label={"Volumes"} value={volumes}
                             onChange={(e) => setVolumes(e.target.value)}
+                            />
+                            <Input label={"Domain"} value={domain}
+                                   onChange={(e) => setDomain(e.target.value)}
                             />
                             <Button auto type={"submit"}>Save</Button>
                         </form>

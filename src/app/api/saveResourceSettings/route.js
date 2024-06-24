@@ -15,6 +15,9 @@ export async function POST(request) {
     if (body.volumes) {
         bodyToGive.volumes = body.volumes;
     }
+    if (body.domain) {
+        bodyToGive.domain = body.domain;
+    }
     const response = await fetch(process.env.API_URL + "/resources/settings", {
         method: "POST",
         headers: {
