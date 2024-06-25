@@ -34,8 +34,9 @@ export default function Resources() {
                         </Link>
                     </div>
                 </div>
+                <div className={"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-5 overflow-y-auto max-h-[82vh]"}>
                 {loading ? (
-                    <div className={"grid grid-cols-4 gap-4 mt-5 overflow-y-auto max-h-[82vh]"}>
+                    <>
                         <Skeleton>
                             <ResourceCardSkeleton/>
                         </Skeleton>
@@ -48,14 +49,13 @@ export default function Resources() {
                         <Skeleton>
                             <ResourceCardSkeleton/>
                         </Skeleton>
-                    </div>
+                    </>
                 ) : (
-                    <div className={"grid grid-cols-4 gap-4 mt-5 overflow-y-auto max-h-[82vh]"}>
-                        {resources.map((resource, index) => (
-                            <ResourceCard key={index} resource={resource}/>
-                        ))}
-                    </div>
+                    resources.map((resource, index) => (
+                        <ResourceCard key={index} resource={resource}/>
+                    ))
                 )}
+            </div>
             </div>
         </>
     )

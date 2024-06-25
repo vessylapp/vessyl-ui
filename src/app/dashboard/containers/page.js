@@ -28,8 +28,10 @@ export default function Containers() {
             <Sidebar/>
             <div className={"p-6"}>
                 <h1 className={"text-3xl font-bold"}>Containers</h1>
-                {isLoading ? (
-                    <div className={"grid grid-cols-4 gap-4 mt-5 overflow-y-auto max-h-[82vh]"}>
+                <div
+                    className={"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-5 overflow-y-auto max-h-[82vh]"}>
+                    {isLoading ? (
+                        <>
                         <Skeleton>
                             <ContainerCardSkeleton/>
                         </Skeleton>
@@ -42,14 +44,13 @@ export default function Containers() {
                         <Skeleton>
                             <ContainerCardSkeleton/>
                         </Skeleton>
-                    </div>
-                ) : (
-                    <div className={"grid grid-cols-4 gap-4 mt-5 overflow-y-auto max-h-[82vh]"}>
-                        {containers.map((container, index) => (
-                            <ContainerCard key={index} container={container}/>
-                        ))}
-                    </div>
-                )}
+                        </>
+                    ) : (
+                    containers.map((container, index) => (
+                        <ContainerCard key={index} container={container}/>
+                    )
+                ))}
+                </div>
             </div>
         </>
     )
