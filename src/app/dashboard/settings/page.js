@@ -5,18 +5,42 @@ import {Button, Input} from "@nextui-org/react";
 import {useState, useEffect} from "react";
 import {userInfo as getUserInfo, storeGitHubPAT} from "@/funcs/client/auth";
 import {useRouter} from "next/navigation";
+import {getVessylAccessUrl, saveVessylAccessUrl} from "@/funcs/client/admin";
 
 export default function Settings() {
     const [pat, setPat] = useState("");
     const [userInfo, setUserInfo] = useState({});
     const [gitHubConnected, setGitHubConnected] = useState(false);
     const [gitHubPatError, setGitHubPatError] = useState(null);
+    const [vessylProxyUrl, setVessylProxyUrl] = useState("");
 
     const router = useRouter();
 
     async function generateLink() {
         const link = "https://github.com/settings/tokens/new?scopes=repo,repo:status,repo_deployment,public_repo,repo:invite,security_events,read:packages,read:org,read:public_key,user,read:user,user:email,read:project,read:gpg_key,read:ssh_key"
         window.open(link, "_blank");
+    }
+
+    async function saveProxyUrl(e) {
+        e.preventDefault();
+        let checkIfValid;
+        try {
+            new URL(vessylProxyUrl);
+            checkIfValid = true;
+        }
+        catch (e) {
+            checkIfValid = false;
+        }
+        if (!checkIfValid) {
+            return;
+        }
+        console.log(vessylProxyUrl);
+        const data = await saveVessylAccessUrl(vessylProxyUrl);
+        if(data.error) {
+            console.log(data.error);
+            return;
+        }
+        window.location.reload();
     }
 
     async function connectBtnPressed() {
@@ -35,6 +59,11 @@ export default function Settings() {
             console.log(data);
             setUserInfo(data);
             setGitHubConnected(data.github);
+            if(data.admin) {
+                const proxyUrl = await getVessylAccessUrl();
+                console.log(proxyUrl);
+                setVessylProxyUrl(proxyUrl.proxyUrl);
+            }
         }
         fetchData();
     }, []);
@@ -83,6 +112,19 @@ export default function Settings() {
                                     <p>@{userInfo.githubJson.username}</p>
                                     <p>{userInfo.githubJson.email}</p>
                                 </div>
+                            </div>
+                        )}
+                        {userInfo.admin === true && (
+                            <div className={"mt-5"}>
+                                <h2 className={"text-xl font-bold"}>Admin Settings</h2>
+                                <form className={"mt-3"} onSubmit={saveProxyUrl}>
+                                    <p className={"text-lg"}>Vessyl Proxy URL</p>
+                                    <Input label={"(http(s)://domain.com)"} value={vessylProxyUrl}
+                                     onChange={(e) => setVessylProxyUrl(e.target.value)}
+                                     className={"mt-3"}
+                                    />
+                                    <Button auto color={"success"} className={"mt-3"} type={"submit"}>Save</Button>
+                                </form>
                             </div>
                         )}
                     </div>
