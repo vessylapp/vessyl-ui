@@ -62,6 +62,9 @@ export default function Settings() {
             if(data.admin) {
                 const proxyUrl = await getVessylAccessUrl();
                 console.log(proxyUrl);
+                if(proxyUrl.error) {
+                    return;
+                }
                 setVessylProxyUrl(proxyUrl.proxyUrl);
             }
         }
