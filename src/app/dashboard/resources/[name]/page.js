@@ -20,6 +20,7 @@ export default function Resource() {
     const [containerId, setContainerId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [deploying, setDeploying] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [deployStream, setDeployStream] = useState("");
     const preRef = useRef(null);
 
@@ -76,6 +77,7 @@ export default function Resource() {
 
     async function saveSettings(e = null){
         if(e) e.preventDefault();
+        setIsSaving(true)
         let newEnvVariables = "";
         let newPorts = "";
         let newVolumes = "";
@@ -101,6 +103,7 @@ export default function Resource() {
             }),
         });
         const data = await res.json();
+        setIsSaving(false);
         console.log(data);
     }
 
@@ -163,6 +166,15 @@ export default function Resource() {
             <Sidebar/>
             <div className={"p-6"}>
                 <h1>Loading...</h1>
+            </div>
+        </>
+    )
+
+    if(isSaving) return (
+        <>
+            <Sidebar/>
+            <div className={"p-6"}>
+                <h1>Saving...</h1>
             </div>
         </>
     )
@@ -230,7 +242,7 @@ export default function Resource() {
                             <Input label={"Volumes"} value={volumes}
                             onChange={(e) => setVolumes(e.target.value)}
                             />
-                            <Input label={"Domain"} value={domain}
+                            <Input label={"Domain (http(s)://domain.com)"} value={domain}
                                    onChange={(e) => setDomain(e.target.value)}
                             />
                             <Button auto type={"submit"}>Save</Button>
