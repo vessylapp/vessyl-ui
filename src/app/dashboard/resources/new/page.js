@@ -36,6 +36,9 @@ export default function NewResource() {
             <h1 className={"text-3xl font-bold"}>New Resource</h1>
             <div className={"mt-5"}>
                 <p className={"text-lg"}>Create a new resource to deploy an app.</p>
+                {error && (
+                    <p className={"text-red-500 mt-2"}>{error}</p>
+                )}
             </div>
             {!loading && (
                 <form className={"mt-5"} onSubmit={(e) => {
