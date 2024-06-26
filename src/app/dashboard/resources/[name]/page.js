@@ -3,7 +3,7 @@
 import {useEffect, useState, useRef} from "react";
 import Sidebar from "@/components/sb/Sidebar";
 import {useRouter} from "next/navigation";
-import {getResource} from "@/funcs/client/resources";
+import {getResource, deleteResource} from "@/funcs/client/resources";
 import {Button, Input, Select, SelectItem} from "@nextui-org/react";
 import Link from "next/link";
 
@@ -22,6 +22,7 @@ export default function Resource() {
     const [isLoading, setIsLoading] = useState(true);
     const [deploying, setDeploying] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [deployStream, setDeployStream] = useState("");
     const preRef = useRef(null);
 
@@ -30,6 +31,17 @@ export default function Resource() {
           preRef.current.scrollTop = preRef.current.scrollHeight;
         }
     }, [deployStream]);
+
+    async function deleteRs() {
+        setIsDeleting(true);
+        const data = await deleteResource(name);
+        if(data.error) {
+            console.log(data.error);
+            return;
+        }
+        setIsDeleting(false);
+        return router.push("/dashboard/resources");
+    }
 
     async function deploy() {
         await saveSettings(null, false);
@@ -185,6 +197,15 @@ export default function Resource() {
         </>
     )
 
+    if(isDeleting) return (
+        <>
+            <Sidebar/>
+            <div className={"p-6"}>
+                <h1>Deleting...</h1>
+            </div>
+        </>
+    )
+
     if (deploying) return (
         <>
             <Sidebar/>
@@ -220,6 +241,9 @@ export default function Resource() {
                     )}
                     <div className={"ml-5"}>
                         <Button auto color={"warning"} onClick={deploy}>Deploy</Button>
+                    </div>
+                    <div className={"ml-5"}>
+                        <Button auto color={"danger"} onClick={deleteRs}>Delete</Button>
                     </div>
                 </div>
                 {showOverview ? (
