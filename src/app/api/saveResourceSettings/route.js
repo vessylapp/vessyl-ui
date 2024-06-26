@@ -18,6 +18,9 @@ export async function POST(request) {
     if (body.domain) {
         bodyToGive.domain = body.domain;
     }
+    if (body.baseDir) {
+        bodyToGive.baseDir = body.baseDir;
+    }
     const response = await fetch(process.env.API_URL + "/resources/settings", {
         method: "POST",
         headers: {

@@ -17,6 +17,7 @@ export default function Resource() {
     const [ports, setPorts] = useState("");
     const [volumes, setVolumes] = useState("");
     const [domain, setDomain] = useState("");
+    const [baseDir, setBaseDir] = useState("");
     const [containerId, setContainerId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [deploying, setDeploying] = useState(false);
@@ -91,6 +92,7 @@ export default function Resource() {
         if(newPorts !== "") bodyToGive.ports = newPorts;
         if(newVolumes !== "") bodyToGive.volumes = newVolumes;
         if(domain !== "") bodyToGive.domain = domain;
+        if(baseDir !== "") bodyToGive.baseDir = baseDir;
         const res = await fetch("/api/saveResourceSettings", {
             method: "POST",
             headers: {
@@ -152,6 +154,9 @@ export default function Resource() {
             }
             if(data.domain) {
                 setDomain(data.domain);
+            }
+            if(data.baseDir) {
+                setBaseDir(data.baseDir);
             }
             setContainerId(data.container.container_id)
             setResourceInfo(data);
@@ -229,6 +234,9 @@ export default function Resource() {
                             <p className={"text-2xl font-bold"}>Settings</p>
                             <Input label={"Name"} value={resourceInfo.name} disabled/>
                             <Input label={"Git URL"} value={resourceInfo.git_url} disabled/>
+                            <Input label={"Base Directory"} value={baseDir}
+                            onChange={(e) => setBaseDir(e.target.value)}
+                            />
                             <h2 className={"text-xl"}>Editable (Seperate with commas)</h2>
                             <Input label={"Environment Variables"} value={envVariables}
                             onChange={(e) => setEnvVariables(e.target.value)}
