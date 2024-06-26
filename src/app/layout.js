@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
     title: "Vessyl",
-    description: "It's all about Docker.",
+    description: "A fast and reliable alternative to Railway and Vercel.",
 };
 
 export default function RootLayout({ children }) {
