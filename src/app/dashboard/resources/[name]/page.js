@@ -32,7 +32,7 @@ export default function Resource() {
     }, [deployStream]);
 
     async function deploy() {
-        await saveSettings();
+        await saveSettings(null, false);
         setDeployStream("");
         setDeploying(true);
         const token = localStorage.getItem("token");
@@ -76,7 +76,7 @@ export default function Resource() {
         return router.push("/dashboard/containers/" + name);
     }
 
-    async function saveSettings(e = null){
+    async function saveSettings(e = null, reload = true){
         if(e) e.preventDefault();
         setIsSaving(true)
         let newEnvVariables = "";
@@ -101,6 +101,7 @@ export default function Resource() {
             body: JSON.stringify({
                 token,
                 name,
+                reload,
                 ...bodyToGive,
             }),
         });
