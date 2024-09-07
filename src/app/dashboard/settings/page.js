@@ -21,7 +21,7 @@ export default function Settings() {
         window.open(link, "_blank");
     }
 
-    async function restartProxy(e) {
+    async function restartProxyBtn(e) {
         e.preventDefault();
         const data = await restartProxy();
         if(data.error) {
@@ -140,9 +140,9 @@ export default function Settings() {
                                     />
                                     <Button auto color={"success"} className={"mt-3"} type={"submit"}>Save</Button>
                                 </form>
-                                <form className={"mt-3"} onSubmit={restartProxy}>
+                                <form className={"mt-3"} onSubmit={restartProxyBtn}>
                                     <p className={"text-lg"}>Restart Proxy</p>
-                                    <Button auto color={"error"} className={"mt-3"} type={"submit"}>Restart
+                                    <Button auto color={"danger"} className={"mt-3"} type={"submit"}>Restart
                                         Proxy</Button>
                                 </form>
                             </div>
