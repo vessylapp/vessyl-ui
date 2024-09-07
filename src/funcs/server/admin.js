@@ -24,3 +24,16 @@ export async function getVessylAccessUrl(token) {
     });
     return await response.json();
 }
+
+export async function restartProxy(token) {
+    const response = await fetch(process.env.API_URL + "/admin/restartproxy", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            token,
+        }),
+    });
+    return await response.json();
+}

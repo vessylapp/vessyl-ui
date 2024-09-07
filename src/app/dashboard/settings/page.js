@@ -5,7 +5,7 @@ import {Button, Input} from "@nextui-org/react";
 import {useState, useEffect} from "react";
 import {userInfo as getUserInfo, storeGitHubPAT} from "@/funcs/client/auth";
 import {useRouter} from "next/navigation";
-import {getVessylAccessUrl, saveVessylAccessUrl} from "@/funcs/client/admin";
+import {getVessylAccessUrl, saveVessylAccessUrl, restartProxy} from "@/funcs/client/admin";
 
 export default function Settings() {
     const [pat, setPat] = useState("");
@@ -19,6 +19,18 @@ export default function Settings() {
     async function generateLink() {
         const link = "https://github.com/settings/tokens/new?scopes=repo,repo:status,repo_deployment,public_repo,repo:invite,security_events,read:packages,read:org,read:public_key,user,read:user,user:email,read:project,read:gpg_key,read:ssh_key"
         window.open(link, "_blank");
+    }
+
+    async function restartProxy(e) {
+        e.preventDefault();
+        const data = await restartProxy();
+        if(data.error) {
+            console.log(data.error);
+            return;
+        }
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
     }
 
     async function saveProxyUrl(e) {
@@ -127,6 +139,11 @@ export default function Settings() {
                                      className={"mt-3"}
                                     />
                                     <Button auto color={"success"} className={"mt-3"} type={"submit"}>Save</Button>
+                                </form>
+                                <form className={"mt-3"} onSubmit={restartProxy}>
+                                    <p className={"text-lg"}>Restart Proxy</p>
+                                    <Button auto color={"error"} className={"mt-3"} type={"submit"}>Restart
+                                        Proxy</Button>
                                 </form>
                             </div>
                         )}
