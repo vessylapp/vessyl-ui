@@ -45,16 +45,23 @@ export async function newResource(name, repo, buildTool) {
 }
 
 export async function deleteResource(name) {
-    const response = await fetch("/api/deleteResource", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token: localStorage.getItem("token"),
-            name: name
-        })
-    });
-    const data = await response.json();
+    let response;
+    let data;
+    try {
+        response = await fetch("/api/deleteResource", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                token: localStorage.getItem("token"),
+                name: name
+            })
+        });
+        data = await response.json();
+    } catch (error) {
+        window.location.href = "/dashboard/resources";
+        return;
+    }
     return data;
 }
