@@ -24,4 +24,10 @@ export const items = [
         icon: "solar:settings-outline",
         title: "Settings",
     },
+    {
+        key: "ports",
+        href: "/dashboard/ports",
+        icon: "solar:benzene-ring-linear",
+        title: "Ports",
+    }
 ];
