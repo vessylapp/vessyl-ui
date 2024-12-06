@@ -15,7 +15,7 @@ export default function Resources() {
     useEffect(() => {
         async function fetchData() {
             const data = await getPorts();
-            setPorts(data);
+            setPorts(data.ports);
             console.log(data);
             setLoading(false);
         }
