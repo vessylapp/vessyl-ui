@@ -9,7 +9,7 @@ export const items = [
     {
         key: "resources",
         href: "/dashboard/resources",
-        icon: "solar:book-minimalistic-linear",
+        icon: "solar:archive-linear",
         title: "Resources",
     },
     {
@@ -19,15 +19,15 @@ export const items = [
         title: "Containers",
     },
     {
-        key: "settings",
-        href: "/dashboard/settings",
-        icon: "solar:settings-outline",
-        title: "Settings",
-    },
-    {
         key: "ports",
         href: "/dashboard/ports",
         icon: "solar:benzene-ring-linear",
         title: "Ports",
+    },
+    {
+        key: "settings",
+        href: "/dashboard/settings",
+        icon: "solar:settings-outline",
+        title: "Settings",
     }
 ];
