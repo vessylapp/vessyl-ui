@@ -37,7 +37,7 @@ export default function Update() {
                 clearInterval(interval);
                 window.location.href = "/";
             }
-        }, 6000);
+        }, 10000);
         const response = await fetch("/api/update", {
             method: "POST",
             headers: {
