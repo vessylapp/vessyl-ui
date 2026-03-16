@@ -16,6 +16,11 @@ export const items = [
         title: "Containers",
     },
     {
+        key: "builds",
+        href: "/dashboard/builds",
+        title: "Builds",
+    },
+    {
         key: "ports",
         href: "/dashboard/ports",
         title: "Ports",

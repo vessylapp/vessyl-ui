@@ -1,19 +1,20 @@
 "use client";
 
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useState} from "react";
 import Link from "next/link";
 import {useParams, useRouter} from "next/navigation";
 import {deleteResource, getResource} from "@/funcs/client/resources";
-import {getToken, postJson, withToken} from "@/lib/client-api";
+import {postJson, withToken} from "@/lib/client-api";
 import {formatListField, normalizeEnvPairs, parseListField} from "@/lib/resource-utils";
 import PageHeader from "@/components/PageHeader";
 import StatusBadge from "@/components/StatusBadge";
+import { useToast } from "@/components/ToastProvider";
 
 export default function Resource() {
     const router = useRouter();
     const params = useParams();
     const resourceName = params?.name;
-    const preRef = useRef(null);
+    const { showToast } = useToast();
 
     const [showOverview, setShowOverview] = useState(true);
     const [resourceInfo, setResourceInfo] = useState(null);
@@ -23,17 +24,10 @@ export default function Resource() {
     const [volumes, setVolumes] = useState("");
     const [domain, setDomain] = useState("");
     const [baseDir, setBaseDir] = useState("");
-    const [deploying, setDeploying] = useState(false);
+    const [isBuilding, setIsBuilding] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [deployStream, setDeployStream] = useState("");
-
-    useEffect(() => {
-        if (preRef.current) {
-            preRef.current.scrollTop = preRef.current.scrollHeight;
-        }
-    }, [deployStream]);
 
     async function loadResourceInfo(currentName) {
         const data = await getResource(currentName);
@@ -91,12 +85,17 @@ export default function Resource() {
         if (domain) body.domain = domain;
         if (baseDir) body.baseDir = baseDir;
 
-        await postJson("/api/saveResourceSettings", withToken(body));
+        const data = await postJson("/api/saveResourceSettings", withToken(body));
 
         if (!silent) {
             setIsSaving(false);
-            await loadResourceInfo(resourceName);
+            if (!data?.error) {
+                await loadResourceInfo(resourceName);
+                showToast({ message: "Changes saved successfully" });
+            }
         }
+
+        return data;
     }
 
     async function deleteCurrentResource() {
@@ -110,46 +109,24 @@ export default function Resource() {
     }
 
     async function deploy() {
-        await saveSettings(null, false, true);
-        setDeployStream("");
-        setDeploying(true);
+        const saveResult = await saveSettings(null, false, true);
+        if (saveResult?.error) {
+            return;
+        }
+        setIsBuilding(true);
 
-        const response = await fetch("/api/deployResource", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                token: getToken(),
-                name: resourceName,
-            }),
-        });
+        const data = await postJson("/api/deployResource", withToken({
+            name: resourceName,
+        }));
 
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
-        let pending = "";
+        setIsBuilding(false);
 
-        if (reader) {
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) {
-                    break;
-                }
-
-                pending += decoder.decode(value, { stream: true });
-                const lines = pending.split(/\r?\n/);
-                pending = lines.pop() || "";
-                setDeployStream((current) => `${current}${lines.join("\n")}${lines.length ? "\n" : ""}`);
-            }
+        if (data?.error) {
+            return;
         }
 
-        if (pending) {
-            setDeployStream((current) => `${current}${pending}`);
-        }
-
-        setDeployStream((current) => `${current}\nDeployment finished. Redirecting to the container page…`);
-        await new Promise((resolve) => setTimeout(resolve, 2500));
-        router.push(`/dashboard/containers/${resourceName}`);
+        showToast({ message: "Build started" });
+        router.push(`/dashboard/builds?build=${data.buildId}`);
     }
 
     function addEnvRow() {
@@ -177,17 +154,6 @@ export default function Resource() {
         return <div className="panel">Loading resource…</div>;
     }
 
-    if (deploying) {
-        return (
-            <div className="page-stack">
-                <PageHeader title={`Deploy ${resourceName}`} note="Build output will stream here until the deployment completes." />
-                <section className="panel">
-                    <pre className="mono-block" ref={preRef}>{deployStream || "Starting deployment…"}</pre>
-                </section>
-            </div>
-        );
-    }
-
     return (
         <div className="page-stack">
             <PageHeader
@@ -200,8 +166,8 @@ export default function Resource() {
                                 View container
                             </Link>
                         ) : null}
-                        <button className="button button-primary" onClick={deploy} type="button">
-                            Deploy
+                        <button className="button button-primary" onClick={deploy} type="button" disabled={isBuilding}>
+                            {isBuilding ? "Starting build…" : "Build"}
                         </button>
                         <button className="button button-danger" onClick={deleteCurrentResource} type="button" disabled={isDeleting}>
                             {isDeleting ? "Deleting…" : "Delete"}

@@ -12,8 +12,10 @@ export async function POST(request) {
             name: body.name,
         }),
     });
-    return new Response(response.body, {
+
+    return new Response(JSON.stringify(await response.json()), {
         headers: {
+            "Content-Type": "application/json",
             "Cache-Control": "no-cache",
         },
     });
