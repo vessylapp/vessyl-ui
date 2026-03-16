@@ -12,6 +12,13 @@ export function userInfo() {
     return postJson("/api/user-info", withToken());
 }
 
+export function changePassword(currentPassword, newPassword) {
+    return postJson("/api/change-password", withToken({
+        currentPassword,
+        newPassword,
+    }));
+}
+
 export function storeGitHubPAT(pat) {
     return postJson("/api/store-github-pat", withToken({ pat }));
 }

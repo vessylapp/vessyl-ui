@@ -18,6 +18,16 @@ export function userInfo(token) {
     });
 }
 
+export function changePassword(token, currentPassword, newPassword) {
+    return workerRequest("/users/password", {
+        body: {
+            token,
+            currentPassword,
+            newPassword,
+        },
+    });
+}
+
 export function storeGitHubPAT(token, pat) {
     return workerRequest("/github/store", {
         body: { token, pat },

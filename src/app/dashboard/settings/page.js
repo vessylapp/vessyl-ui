@@ -1,7 +1,7 @@
 "use client";
 
 import {useState, useEffect} from "react";
-import {userInfo as getUserInfo, storeGitHubPAT} from "@/funcs/client/auth";
+import {changePassword, userInfo as getUserInfo, storeGitHubPAT} from "@/funcs/client/auth";
 import {getVessylAccessUrl, saveVessylAccessUrl, restartProxy} from "@/funcs/client/admin";
 import PageHeader from "@/components/PageHeader";
 import StatusBadge from "@/components/StatusBadge";
@@ -12,6 +12,12 @@ export default function Settings() {
     const [gitHubConnected, setGitHubConnected] = useState(false);
     const [gitHubPatError, setGitHubPatError] = useState(null);
     const [vessylProxyUrl, setVessylProxyUrl] = useState("");
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [passwordError, setPasswordError] = useState(null);
+    const [passwordSuccess, setPasswordSuccess] = useState("");
+    const [changingPassword, setChangingPassword] = useState(false);
 
     async function generateLink() {
         const link = "https://github.com/settings/tokens/new?scopes=repo,repo:status,repo_deployment,public_repo,repo:invite,security_events,read:packages,read:org,read:public_key,user,read:user,user:email,read:project,read:gpg_key,read:ssh_key"
@@ -58,6 +64,36 @@ export default function Settings() {
         return window.location.reload();
     }
 
+    async function changePasswordPressed(event) {
+        event.preventDefault();
+        setPasswordError(null);
+        setPasswordSuccess("");
+
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            setPasswordError("All password fields are required.");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            setPasswordError("New passwords do not match.");
+            return;
+        }
+
+        setChangingPassword(true);
+        const data = await changePassword(currentPassword, newPassword);
+        setChangingPassword(false);
+
+        if (data.error) {
+            setPasswordError(data.error);
+            return;
+        }
+
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setPasswordSuccess("Password updated.");
+    }
+
     useEffect(() => {
         async function fetchData() {
             const data = await getUserInfo();
@@ -77,6 +113,51 @@ export default function Settings() {
     return (
         <div className="page-stack">
             <PageHeader title="Settings" note="Manage your GitHub access and instance-wide admin settings." />
+
+            <section className="panel panel-section">
+                <div className="stack-sm">
+                    <h2 className="text-xl font-semibold">Password</h2>
+                    <form className="stack-md" onSubmit={changePasswordPressed}>
+                        {passwordError ? <div className="notice notice-danger">{passwordError}</div> : null}
+                        {passwordSuccess ? <div className="notice">{passwordSuccess}</div> : null}
+                        <label className="field">
+                            <span className="field-label">Current password</span>
+                            <input
+                                className="input"
+                                type="password"
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                autoComplete="current-password"
+                            />
+                        </label>
+                        <label className="field">
+                            <span className="field-label">New password</span>
+                            <input
+                                className="input"
+                                type="password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                autoComplete="new-password"
+                            />
+                        </label>
+                        <label className="field">
+                            <span className="field-label">Confirm new password</span>
+                            <input
+                                className="input"
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                autoComplete="new-password"
+                            />
+                        </label>
+                        <div className="page-actions">
+                            <button className="button button-primary" disabled={changingPassword} type="submit">
+                                {changingPassword ? "Saving…" : "Change password"}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
 
             <section className="panel panel-section">
                 <div className="stack-sm">
