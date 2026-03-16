@@ -1,130 +1,148 @@
 "use client";
 
 import {useEffect, useState} from "react";
-import Sidebar from "@/components/sb/Sidebar";
-import {useRouter} from "next/navigation";
-import {getContainer, containerLogs, startContainer, stopContainer} from "@/funcs/client/containers";
-import {Button, Spinner} from "@nextui-org/react";
+import {useParams, useRouter} from "next/navigation";
+import {containerLogs, getContainer, startContainer, stopContainer} from "@/funcs/client/containers";
+import {formatDate} from "@/lib/resource-utils";
+import PageHeader from "@/components/PageHeader";
+import StatusBadge from "@/components/StatusBadge";
 
 export default function Container() {
     const router = useRouter();
-    const [name, setName] = useState("");
-    const [showLogs, setShowLogs] = useState(true);
+    const params = useParams();
+    const containerName = params?.name;
+
+    const [view, setView] = useState("logs");
     const [running, setRunning] = useState(false);
-    const [className, setClassName] = useState("border-red-500");
     const [logs, setLogs] = useState("");
-    const [containerInfo, setContainerInfo] = useState({});
+    const [containerInfo, setContainerInfo] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [action, setAction] = useState("");
-    const [actioning, setActioning] = useState(false);
+
+    async function loadContainer() {
+        const data = await getContainer(containerName);
+        if(data?.error) {
+            router.push("/dashboard/containers");
+            return;
+        }
+
+        setContainerInfo(data);
+        setRunning(Boolean(data.State?.Running));
+        setLoading(false);
+    }
+
+    async function loadLogs() {
+        if (view !== "logs") {
+            return;
+        }
+
+        const data = await containerLogs(containerName);
+        setLogs(data);
+    }
 
     useEffect(() => {
-        setName(window.location.pathname.split("/").pop());
-        async function getContainerInfo(name) {
-            const data = await getContainer(name);
-            if(data.error) {
-                return router.push("/dashboard/containers");
-            }
-            setContainerInfo(data);
-            setRunning(data.State.Running);
-            if (data.State.Running) {
-                setClassName("border-green-500");
-            }
+        if (!containerName) {
+            return;
         }
-        getContainerInfo(window.location.pathname.split("/").pop());
-        async function getLogs() {
-            if (!showLogs) {
-                return;
-            }
-            const data = await containerLogs(window.location.pathname.split("/").pop());
-            setLogs(data);
+
+        loadContainer();
+    }, [containerName]);
+
+    useEffect(() => {
+        if (!containerName) {
+            return;
         }
-        getLogs();
+
+        loadLogs();
         const intervalId = setInterval(() => {
-            if (!showLogs) {
+            if (!running || view !== "logs") {
                 return;
             }
-            if(!running) {
-                return;
-            }
-            getLogs();
+            loadLogs();
         }, 1500);
-        return () => {
-            clearInterval(intervalId);
-        };
-    }, []);
 
-    async function start() {
-        setAction("Starting");
-        setActioning(true);
-        await startContainer(name);
-        console.log("Started container");
-        window.location.reload();
+        return () => clearInterval(intervalId);
+    }, [containerName, running, view]);
+
+    async function runAction(type) {
+        setAction(type);
+        if (type === "Starting") {
+            await startContainer(containerName);
+        } else {
+            await stopContainer(containerName);
+        }
+        await loadContainer();
+        await loadLogs();
+        setAction("");
     }
 
-    async function stop() {
-        setAction("Stopping");
-        setActioning(true);
-        await stopContainer(name);
-        console.log("Stopped container");
-        window.location.reload();
-    }
-
-    if(actioning) {
-        return (
-            <>
-                <Sidebar/>
-                <div className="flex flex-col min-h-screen p-6">
-                    <h1 className="text-4xl mb-5 font-bold">{action} container</h1>
-                    <p className="mb-2">{action} container {name}</p>
-                    <Spinner size="lg"/>
-                </div>
-            </>
-        )
+    if (loading) {
+        return <div className="panel">Loading container…</div>;
     }
 
     return (
-        <>
-            <Sidebar/>
-            <div className={"p-6"}>
-                <div className="flex flex-row mb-4">
-                    <h1 className={"text-3xl font-bold border-b-2 " + className}>{name}</h1>
-                    <div className={"ml-10"}>
-                        <button onClick={() => setShowLogs(true)}
-                                className={`transition-all duration-500 px-4 py-2 border-b-2 ${showLogs ? 'border-blue-500' : 'border-gray-500'}`}>Logs
+        <div className="page-stack">
+            <PageHeader
+                title={containerName}
+                note={containerInfo?.Image}
+                actions={(
+                    <>
+                        <StatusBadge tone={running ? "success" : "danger"}>
+                            {running ? "Running" : "Stopped"}
+                        </StatusBadge>
+                        <button
+                            className={`button ${running ? "button-danger" : "button-primary"}`}
+                            type="button"
+                            onClick={() => runAction(running ? "Stopping" : "Starting")}
+                            disabled={Boolean(action)}
+                        >
+                            {action || (running ? "Stop container" : "Start container")}
                         </button>
-                        <button onClick={() => setShowLogs(false)}
-                                className={`transition-all duration-500 px-4 py-2 border-b-2 ${showLogs ? 'border-gray-500' : 'border-blue-500'}`}>Overview
-                        </button>
-                    </div>
-                    <div className={"ml-10"}>
-                        {running ? (
-                            <Button auto color={"danger"} onClick={stop}>Stop</Button>
-                        ) : (
-                            <Button auto color={"success"} onClick={start}>Start</Button>
-                        )}
-                    </div>
-                </div>
-                {showLogs ? (
-                    <pre className="border p-2 rounded-md overflow-auto max-h-[90vh] max-w-[175vh]">
-                        {logs === "" ? "No logs available" : logs}
-                    </pre>
-                ) : (
-                    <div className={"border p-2 rounded-md overflow-auto max-h-[90vh] max-w-[175vh]"}>
-                        <p>Overview</p>
-                        <p>Container ID: {containerInfo.Id}</p>
-                        <p>Image: {containerInfo.Image}</p>
-                        <p>Created: {new Date(containerInfo.Created * 1000).toLocaleString()}</p>
-                        <p>State: {containerInfo.State.Status}</p>
-                        <p>Running: {containerInfo.State.Running ? "Yes" : "No"}</p>
-                        <p>Paused: {containerInfo.State.Paused ? "Yes" : "No"}</p>
-                        <p>Restarting: {containerInfo.State.Restarting ? "Yes" : "No"}</p>
-                        <p>OOM Killed: {containerInfo.State.OOMKilled ? "Yes" : "No"}</p>
-                        <p>Exit Code: {containerInfo.State.ExitCode}</p>
-                        <p>Network Settings: </p>
-                        <pre>{JSON.stringify(containerInfo.NetworkSettings, null, 2)}</pre>
-                    </div>
+                    </>
                 )}
+            />
+
+            <div className="tabs">
+                <button className={`tab ${view === "logs" ? "tab-active" : ""}`} onClick={() => setView("logs")} type="button">
+                    Logs
+                </button>
+                <button className={`tab ${view === "overview" ? "tab-active" : ""}`} onClick={() => setView("overview")} type="button">
+                    Overview
+                </button>
             </div>
-        </>
-    )
+
+            {view === "logs" ? (
+                <section className="panel">
+                    <pre className="mono-block">{logs || "No logs available."}</pre>
+                </section>
+            ) : (
+                <div className="split">
+                    <section className="panel panel-section">
+                        <h2 className="text-xl font-semibold">State</h2>
+                        <div className="meta-list">
+                            <span className="meta-label">Container ID</span>
+                            <span>{containerInfo.Id}</span>
+                            <span className="meta-label">Created</span>
+                            <span>{formatDate(containerInfo.Created)}</span>
+                            <span className="meta-label">Status</span>
+                            <span>{containerInfo.State?.Status}</span>
+                            <span className="meta-label">Exit code</span>
+                            <span>{containerInfo.State?.ExitCode}</span>
+                            <span className="meta-label">Restarting</span>
+                            <span>{containerInfo.State?.Restarting ? "Yes" : "No"}</span>
+                            <span className="meta-label">Paused</span>
+                            <span>{containerInfo.State?.Paused ? "Yes" : "No"}</span>
+                            <span className="meta-label">OOM killed</span>
+                            <span>{containerInfo.State?.OOMKilled ? "Yes" : "No"}</span>
+                        </div>
+                    </section>
+
+                    <section className="panel panel-section">
+                        <h2 className="text-xl font-semibold">Network settings</h2>
+                        <pre className="mono-block">{JSON.stringify(containerInfo.NetworkSettings, null, 2)}</pre>
+                    </section>
+                </div>
+            )}
+        </div>
+    );
 }

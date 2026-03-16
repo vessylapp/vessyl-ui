@@ -1,17 +1,15 @@
 "use client";
 
 import React, {useEffect} from "react";
-import {Button, Input, Checkbox, Link, Divider} from "@nextui-org/react";
-import {Icon} from "@iconify/react";
 import {status} from "@/funcs/client/status";
 import {login} from "@/funcs/client/auth";
 import {useRouter} from "next/navigation";
 import {isLoggedIn} from "@/funcs/client/isLoggedIn";
+import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 
 export default function Login() {
-    const [isVisible, setIsVisible] = React.useState(false);
-    const [serverSettings, setServerSettings] = React.useState(null);
-    const [registrationEnabled, setRegistrationEnabled] = React.useState(false);
+    const [passwordVisible, setPasswordVisible] = React.useState(false);
     const [error, setError] = React.useState(null);
     const router = useRouter();
 
@@ -22,13 +20,12 @@ export default function Login() {
                 return router.push("/dashboard");
             }
             const data = await status();
-            setServerSettings(data);
-            setRegistrationEnabled(data.registration);
+            if (data.setup === false) {
+                router.push("/auth/register");
+            }
         }
         fetchData();
     }, []);
-
-    const toggleVisibility = () => setIsVisible(!isVisible);
 
     async function handleLogin(e) {
         e.preventDefault();
@@ -47,50 +44,38 @@ export default function Login() {
     }
 
     return (
-        <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 p-2 sm:p-4 lg:p-8">
-            <div className="flex w-full max-w-sm flex-col gap-4 rounded-large bg-content1 px-8 pb-10 pt-6 shadow-large">
-                <p className="pb-2 text-xl font-medium">Log In</p>
-                {error && <p className="text-red-500">{error}</p>}
-                <form className="flex flex-col gap-3" onSubmit={handleLogin}>
-                    <Input
-                        label="Username"
-                        name="username"
-                        placeholder="Enter your username"
-                        type="text"
-                        variant="bordered"
-                    />
-
-                    <Input
-                        endContent={
-                            <button type="button" onClick={toggleVisibility}>
-                                {isVisible ? (
-                                    <Icon
-                                        className="pointer-events-none text-2xl text-default-400"
-                                        icon="solar:eye-closed-linear"
-                                    />
-                                ) : (
-                                    <Icon
-                                        className="pointer-events-none text-2xl text-default-400"
-                                        icon="solar:eye-bold"
-                                    />
-                                )}
-                            </button>
-                        }
-                        label="Password"
-                        name="password"
-                        placeholder="Enter your password"
-                        type={isVisible ? "text" : "password"}
-                        variant="bordered"
-                    />
-                    <Button color="primary" type="submit">
-                        Log In
-                    </Button>
+        <div className="auth-shell">
+            <div className="auth-card">
+                <PageHeader title="Log in" note="Use your Vessyl account to manage resources and containers." />
+                {error ? <div className="notice notice-danger">{error}</div> : null}
+                <form className="stack-md" onSubmit={handleLogin}>
+                    <label className="field">
+                        <span className="field-label">Username</span>
+                        <input className="input" name="username" type="text" autoComplete="username" />
+                    </label>
+                    <label className="field">
+                        <span className="field-label">Password</span>
+                        <input
+                            className="input"
+                            name="password"
+                            type={passwordVisible ? "text" : "password"}
+                            autoComplete="current-password"
+                        />
+                    </label>
+                    <label className="field-note">
+                        <input
+                            type="checkbox"
+                            checked={passwordVisible}
+                            onChange={() => setPasswordVisible((current) => !current)}
+                        />{" "}
+                        Show password
+                    </label>
+                    <button className="button button-primary" type="submit">
+                        Log in
+                    </button>
                 </form>
-                <p className="text-center text-small">
-                    Don't have an account?&nbsp;
-                    <Link href="/auth/register" size="sm">
-                        Sign up
-                    </Link>
+                <p className="auth-footer">
+                    Need an account? <Link href="/auth/register" className="auth-link">Register</Link>
                 </p>
             </div>
         </div>

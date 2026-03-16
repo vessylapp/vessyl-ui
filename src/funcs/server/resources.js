@@ -1,74 +1,36 @@
-export async function getResources(token) {
-    const response = await fetch(process.env.API_URL + "/resources", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token
-        })
+import { workerRequest } from "@/lib/server-api";
+
+export function getResources(token) {
+    return workerRequest("/resources", {
+        body: { token },
     });
-    const data = await response.json();
-    return data;
 }
 
-export async function getResource(token, name) {
-    const response = await fetch(process.env.API_URL + "/resources/info", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token,
-            name
-        })
+export function getResource(token, name) {
+    return workerRequest("/resources/info", {
+        body: { token, name },
     });
-    const data = await response.json();
-    return data;
 }
 
-export async function newResource(name, repo, type, token) {
-    const response = await fetch(process.env.API_URL + "/resources/new", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
+export function newResource(name, repo, type, token) {
+    return workerRequest("/resources/new", {
+        body: {
             token,
-            name: name,
+            name,
             git_url: repo,
             type,
-        })
+        },
     });
-    const data = await response.json();
-    return data;
 }
 
-export async function deleteResource(name, token) {
-    const response = await fetch(process.env.API_URL + "/resources/delete", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token,
-            name
-        })
+export function deleteResource(name, token) {
+    return workerRequest("/resources/delete", {
+        body: { token, name },
     });
-    const data = await response.json();
-    return data;
 }
 
-export async function getPorts(token) {
-    const response = await fetch(process.env.API_URL + "/ports", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token
-        })
+export function getPorts(token) {
+    return workerRequest("/ports", {
+        body: { token },
     });
-    const data = await response.json();
-    return data;
 }

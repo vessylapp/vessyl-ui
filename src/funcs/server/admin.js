@@ -1,39 +1,19 @@
-export async function saveVessylAccessUrl(url, token) {
-    const response = await fetch(process.env.API_URL + "/admin/saveproxy", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            url,
-            token,
-        }),
+import { workerRequest } from "@/lib/server-api";
+
+export function saveVessylAccessUrl(url, token) {
+    return workerRequest("/admin/saveproxy", {
+        body: { url, token },
     });
-    return await response.json();
 }
 
-export async function getVessylAccessUrl(token) {
-    const response = await fetch(process.env.API_URL + "/admin/getproxy", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            token,
-        }),
+export function getVessylAccessUrl(token) {
+    return workerRequest("/admin/getproxy", {
+        body: { token },
     });
-    return await response.json();
 }
 
-export async function restartProxy(token) {
-    const response = await fetch(process.env.API_URL + "/admin/restartproxy", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            token,
-        }),
+export function restartProxy(token) {
+    return workerRequest("/admin/restartproxy", {
+        body: { token },
     });
-    return await response.json();
 }

@@ -1,73 +1,89 @@
 "use client";
 
 import React, {useEffect, useState} from "react";
-import {Button, Card, CardBody, CardFooter, Chip, ScrollShadow, Spacer} from "@nextui-org/react";
-
-import {items} from "./sidebar-items";
-
-import Sidebarf from "./sidebarf";
-import {useRouter} from "next/navigation";
-import {isLoggedIn} from "@/funcs/client/isLoggedIn";
+import {usePathname, useRouter} from "next/navigation";
 import {checkForUpdates} from "@/funcs/client/status";
 import Link from "next/link";
+import {userInfo} from "@/funcs/client/auth";
+import {items} from "./sidebar-items";
 
 export default function Sidebar() {
     const [update, setUpdate] = useState(false);
     const [uiVersion, setUiVersion] = useState("");
     const [workerVersion, setWorkerVersion] = useState("");
+    const [currentUser, setCurrentUser] = useState(null);
     const router = useRouter();
+    const pathname = usePathname();
 
     useEffect(() => {
         async function fetchData() {
-            const areWeLoggedIn = await isLoggedIn();
-            if (!areWeLoggedIn) {
-                return router.push("/auth/login");
+            const [data, account] = await Promise.all([
+                checkForUpdates(),
+                userInfo(),
+            ]);
+
+            if (account?.error) {
+                router.push("/auth/login");
+                return;
             }
-            const data = await checkForUpdates();
-            console.log(data);
+
             setUpdate(data.update);
             setUiVersion(data.uiVersion);
             setWorkerVersion(data.workerVersion);
+            setCurrentUser(account);
         }
         fetchData();
     }, []);
 
+    const navItems = items.filter((item) => item.href);
+
+    function logout() {
+        localStorage.removeItem("token");
+        router.push("/auth/login");
+    }
+
     return (
-        <div className="h-dvh">
-            <div className="h-full w-72 border-r-small border-divider p-6">
-                <div className="flex items-center gap-2 px-2">
-                    <span className="text-3xl font-bold">Vessyl</span>
-                    {update ? (
-                        <Link href={"/dashboard/update"}>
-                            <Chip
-                                color="warning"
-                                className={"ml-5"}
-                                variant="solid">
-                                Update
-                            </Chip>
-                        </Link>
-                    ) : (
-                        <div className="flex flex-col ml-3">
-                            <Chip
-                                variant="faded"
-                                color="success"
-                            >
-                                UI: {uiVersion}
-                            </Chip>
-                            <Chip
-                                variant="faded"
-                                color="success"
-                                className={"mt-1"}
-                            >
-                                Worker: {workerVersion}
-                            </Chip>
-                        </div>
-                    )}
+        <aside className="app-sidebar">
+            <div className="app-brand">
+                <div className="app-brand-name">Vessyl</div>
+                <div className="app-brand-meta">
+                    {currentUser ? currentUser.username : "Loading account"}
                 </div>
-                <ScrollShadow className="-mr-6 h-full max-h-full py-[2vh] pr-6">
-                    <Sidebarf defaultSelectedKey="home" items={items}/>
-                </ScrollShadow>
             </div>
-        </div>
+
+            <nav className="app-nav" aria-label="Dashboard">
+                {navItems.map((item) => {
+                    const active = item.href === "/dashboard"
+                        ? pathname === item.href
+                        : pathname.startsWith(item.href);
+
+                    return (
+                        <Link
+                            key={item.key}
+                            href={item.href}
+                            className={`app-nav-link ${active ? "app-nav-link-active" : ""}`}
+                        >
+                            {item.title}
+                        </Link>
+                    );
+                })}
+            </nav>
+
+            <div className="app-sidebar-footer">
+                {update ? (
+                    <Link href="/dashboard/update" className="status-badge status-badge-warning">
+                        Update available
+                    </Link>
+                ) : (
+                    <div className="stack-sm">
+                        <div className="status-badge">UI {uiVersion || "..."}</div>
+                        <div className="status-badge">Worker {workerVersion || "..."}</div>
+                    </div>
+                )}
+                <button type="button" className="button button-ghost" onClick={logout}>
+                    Log out
+                </button>
+            </div>
+        </aside>
     );
 }

@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 export async function POST(request) {
-    request.headers.set('Cache-Control', 'no-cache');
     const body = await request.json();
     const bodyToGive = {};
     if (body.env) {
@@ -32,8 +31,8 @@ export async function POST(request) {
             ...bodyToGive,
         }),
     });
-    const data = await response.json();
-    return new Response(JSON.stringify(data), {
+
+    return new Response(JSON.stringify(await response.json()), {
         headers: {
             "Content-Type": "application/json",
             "Cache-Control": "no-cache",

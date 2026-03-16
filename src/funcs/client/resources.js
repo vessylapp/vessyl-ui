@@ -1,81 +1,30 @@
-export async function getResources() {
-    const response = await fetch("/api/getResources", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token: localStorage.getItem("token")
-        })
-    });
-    const data = await response.json();
-    return data;
+import { postJson, withToken } from "@/lib/client-api";
+
+export function getResources() {
+    return postJson("/api/getResources", withToken());
 }
 
-export async function getResource(name) {
-    const response = await fetch("/api/getResource", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token: localStorage.getItem("token"),
-            name: name
-        })
-    });
-    const data = await response.json();
-    return data;
+export function getResource(name) {
+    return postJson("/api/getResource", withToken({ name }));
 }
 
-export async function newResource(name, repo, buildTool) {
-    const response = await fetch("/api/newResource", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token: localStorage.getItem("token"),
-            name: name,
-            git_url: repo,
-            type: buildTool
-        })
-    });
-    const data = await response.json();
-    return data;
+export function newResource(name, repo, buildTool) {
+    return postJson("/api/newResource", withToken({
+        name,
+        git_url: repo,
+        type: buildTool,
+    }));
 }
 
 export async function deleteResource(name) {
-    let response;
-    let data;
     try {
-        response = await fetch("/api/deleteResource", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                token: localStorage.getItem("token"),
-                name: name
-            })
-        });
-        data = await response.json();
+        return await postJson("/api/deleteResource", withToken({ name }));
     } catch (error) {
         window.location.href = "/dashboard/resources";
-        return;
+        return null;
     }
-    return data;
 }
 
-export async function getPorts() {
-    const response = await fetch("/api/getPorts", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token: localStorage.getItem("token")
-        })
-    });
-    const data = await response.json();
-    return data;
+export function getPorts() {
+    return postJson("/api/getPorts", withToken());
 }

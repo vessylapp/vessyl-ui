@@ -1,10 +1,9 @@
 "use client";
 
-import Sidebar from "@/components/sb/Sidebar";
-import {Button, Spinner} from "@nextui-org/react";
 import {useRouter} from "next/navigation";
 import {checkForUpdates} from "@/funcs/client/status";
 import {useEffect, useState} from "react";
+import PageHeader from "@/components/PageHeader";
 
 export default function Update() {
     const [update, setUpdate] = useState(false);
@@ -16,7 +15,6 @@ export default function Update() {
     useEffect(() => {
         async function fetchData() {
             const data = await checkForUpdates();
-            console.log(data);
             setUpdate(data.update);
             if (!data.update) {
                 return router.push("/dashboard");
@@ -64,34 +62,28 @@ export default function Update() {
 
     if(updating) {
         return (
-            <div className={"flex flex-col justify-center items-center h-screen w-screen"}>
-                <h1 className={"text-3xl font-bold"}>Vessyl is updating...</h1>
-                <p className={"text-lg mt-5"}>Please wait while Vessyl updates.</p>
-                <p className={"text-lg mt-5"}>This will take a few minutes, you will be redirected once the update is complete.</p>
-                <p className={"text-lg mt-5"}>Check for completion: {checkCount.toString()}</p>
-                <Spinner size={"large"} className={"mt-5"} color={"success"}/>
+            <div className="page-stack">
+                <PageHeader title="Updating" note="The instance will come back automatically after the updater finishes." />
+                <section className="panel stack-md">
+                    <div>Checks completed: {checkCount}</div>
+                    <div className="notice">Waiting for the application to become reachable again…</div>
+                </section>
             </div>
         )
     }
 
     return (
-        <>
-            <Sidebar/>
-            <div className={"p-6"}>
-                <h1 className={"text-3xl font-bold"}>Vessyl Update</h1>
-                {error && <p className={"text-red-500"}>{error}</p>}
-                <div className={"mt-5"}>
-                    <p className={"text-lg"}>Vessyl requires an update. Click the button below to update.</p>
-                    <Button
-                        auto
-                        color={"warning"}
-                        onClick={updateVessyl}
-                        className={"mt-3"}
-                    >
-                        Update
-                    </Button>
+        <div className="page-stack">
+            <PageHeader title="Update" note="Start the updater when a newer UI or worker release is available." />
+            <section className="panel stack-md">
+                {error ? <div className="notice notice-danger">{error}</div> : null}
+                <p className="page-note">
+                    This pulls the latest updater container and restarts the Vessyl stack.
+                </p>
+                <div className="page-actions">
+                    <button className="button button-primary" onClick={updateVessyl}>Update</button>
                 </div>
-            </div>
-        </>
+            </section>
+        </div>
     )
 }

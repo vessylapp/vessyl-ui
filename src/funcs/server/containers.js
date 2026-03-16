@@ -1,76 +1,38 @@
-export async function getContainers(token) {
-    const response = await fetch(process.env.API_URL + "/containers", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token
-        })
+import { workerRequest } from "@/lib/server-api";
+
+export function getContainers(token) {
+    return workerRequest("/containers", {
+        body: { token },
     });
-    const data = await response.json();
-    return data;
 }
 
 export async function getContainer(token, name) {
-    const response = await fetch(process.env.API_URL + "/containers/" + name + "/info", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token
-        })
-    });
-    let data;
     try {
-        data = await response.json();
-    } catch (e) {
-        data = {
-            error: true,
-        };
+        return await workerRequest(`/containers/${name}/info`, {
+            body: { token },
+        });
+    } catch (error) {
+        return { error: true };
     }
-    return data;
 }
 
-export async function containerLogs(token, name) {
-    const response = await fetch(process.env.API_URL + "/containers/" + name + "/logs", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token
-        })
+export function containerLogs(token, name) {
+    return workerRequest(`/containers/${name}/logs`, {
+        body: { token },
+        responseType: "text",
     });
-    const data = await response.text();
-    return data;
 }
 
-export async function stopContainer(token, name) {
-    const response = await fetch(process.env.API_URL + "/containers/" + name + "/stop", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token,
-        })
+export function stopContainer(token, name) {
+    return workerRequest(`/containers/${name}/stop`, {
+        body: { token },
+        responseType: "text",
     });
-    const data = await response.text()
-    return data;
 }
 
-export async function startContainer(token, name) {
-    const response = await fetch(process.env.API_URL + "/containers/" + name + "/start", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token,
-        })
+export function startContainer(token, name) {
+    return workerRequest(`/containers/${name}/start`, {
+        body: { token },
+        responseType: "text",
     });
-    const data = await response.text()
-    return data;
 }

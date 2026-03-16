@@ -1,11 +1,10 @@
 "use client";
 
-import Sidebar from "@/components/sb/Sidebar";
-import {Button, Input} from "@nextui-org/react";
 import {useState, useEffect} from "react";
 import {userInfo as getUserInfo, storeGitHubPAT} from "@/funcs/client/auth";
-import {useRouter} from "next/navigation";
 import {getVessylAccessUrl, saveVessylAccessUrl, restartProxy} from "@/funcs/client/admin";
+import PageHeader from "@/components/PageHeader";
+import StatusBadge from "@/components/StatusBadge";
 
 export default function Settings() {
     const [pat, setPat] = useState("");
@@ -13,8 +12,6 @@ export default function Settings() {
     const [gitHubConnected, setGitHubConnected] = useState(false);
     const [gitHubPatError, setGitHubPatError] = useState(null);
     const [vessylProxyUrl, setVessylProxyUrl] = useState("");
-
-    const router = useRouter();
 
     async function generateLink() {
         const link = "https://github.com/settings/tokens/new?scopes=repo,repo:status,repo_deployment,public_repo,repo:invite,security_events,read:packages,read:org,read:public_key,user,read:user,user:email,read:project,read:gpg_key,read:ssh_key"
@@ -25,7 +22,6 @@ export default function Settings() {
         e.preventDefault();
         const data = await restartProxy();
         if(data.error) {
-            console.log(data.error);
             return;
         }
         setTimeout(() => {
@@ -46,10 +42,8 @@ export default function Settings() {
         if (!checkIfValid) {
             return;
         }
-        console.log(vessylProxyUrl);
         const data = await saveVessylAccessUrl(vessylProxyUrl);
         if(data.error) {
-            console.log(data.error);
             return;
         }
         window.location.reload();
@@ -57,7 +51,6 @@ export default function Settings() {
 
     async function connectBtnPressed() {
         const data = await storeGitHubPAT(pat);
-        console.log(data);
         if (data.error) {
             setGitHubPatError(data.error);
             return;
@@ -68,12 +61,10 @@ export default function Settings() {
     useEffect(() => {
         async function fetchData() {
             const data = await getUserInfo();
-            console.log(data);
             setUserInfo(data);
             setGitHubConnected(data.github);
             if(data.admin) {
                 const proxyUrl = await getVessylAccessUrl();
-                console.log(proxyUrl);
                 if(proxyUrl.error) {
                     return;
                 }
@@ -84,72 +75,77 @@ export default function Settings() {
     }, []);
 
     return (
-        <>
-            <Sidebar/>
-            <div className={"p-6"}>
-                <h1 className={"text-3xl font-bold"}>Settings</h1>
-                <div className={"mt-5"}>
-                    <h2 className={"text-xl font-bold"}>GitHub Settings</h2>
-                    <div className={"mt-3"}>
-                        {!gitHubConnected && (
-                            <>
-                                <p className={"text-lg"}>To use the GitHub API, you need to create a personal access
-                                    token.</p>
-                                {gitHubPatError && (
-                                    <p className={"text-red-500"}>{gitHubPatError}</p>
-                                )}
-                                <form className={"mt-3"}>
-                                    <Input
-                                        placeholder={"Personal Access Token"}
-                                        type={"password"}
-                                        className={"mt-3"}
-                                        value={pat}
-                                        onChange={(e) => setPat(e.target.value)}
-                                    />
-                                    <Button auto
-                                            color={"success"}
-                                            className={"mt-3"}
-                                            onClick={connectBtnPressed}>
-                                        Connect
-                                    </Button>
-                                    <Button auto
-                                            onClick={generateLink}
-                                            className={"ml-3"}>
-                                        Generate Token
-                                    </Button>
-                                </form>
-                            </>
-                        )}
-                        {gitHubConnected && (
-                            <div className={"p-4 border-2 border-success rounded-xl"}>
-                                <p className={"text-lg"}>Connected as:</p>
-                                <div className={"mt-3"}>
-                                    <p>@{userInfo.githubJson.username}</p>
-                                    <p>{userInfo.githubJson.email}</p>
-                                </div>
+        <div className="page-stack">
+            <PageHeader title="Settings" note="Manage your GitHub access and instance-wide admin settings." />
+
+            <section className="panel panel-section">
+                <div className="stack-sm">
+                    <h2 className="text-xl font-semibold">GitHub access</h2>
+                    {gitHubConnected ? (
+                        <div className="meta-list">
+                            <span className="meta-label">Status</span>
+                            <span><StatusBadge tone="success">Connected</StatusBadge></span>
+                            <span className="meta-label">Username</span>
+                            <span>@{userInfo.githubJson?.username}</span>
+                            <span className="meta-label">Email</span>
+                            <span>{userInfo.githubJson?.email}</span>
+                        </div>
+                    ) : (
+                        <form className="stack-md" onSubmit={(event) => {
+                            event.preventDefault();
+                            connectBtnPressed();
+                        }}>
+                            {gitHubPatError ? <div className="notice notice-danger">{gitHubPatError}</div> : null}
+                            <label className="field">
+                                <span className="field-label">Personal access token</span>
+                                <input
+                                    className="input"
+                                    placeholder="github_pat_..."
+                                    type="password"
+                                    value={pat}
+                                    onChange={(e) => setPat(e.target.value)}
+                                />
+                            </label>
+                            <div className="page-actions">
+                                <button className="button button-primary" type="submit">Connect</button>
+                                <button className="button" type="button" onClick={generateLink}>Generate token</button>
                             </div>
-                        )}
-                        {userInfo.admin === true && (
-                            <div className={"mt-5"}>
-                                <h2 className={"text-xl font-bold"}>Admin Settings</h2>
-                                <form className={"mt-3"} onSubmit={saveProxyUrl}>
-                                    <p className={"text-lg"}>Vessyl Proxy URL</p>
-                                    <Input label={"(http(s)://domain.com)"} value={vessylProxyUrl}
-                                     onChange={(e) => setVessylProxyUrl(e.target.value)}
-                                     className={"mt-3"}
-                                    />
-                                    <Button auto color={"success"} className={"mt-3"} type={"submit"}>Save</Button>
-                                </form>
-                                <form className={"mt-3"} onSubmit={restartProxyBtn}>
-                                    <p className={"text-lg"}>Restart Proxy</p>
-                                    <Button auto color={"danger"} className={"mt-3"} type={"submit"}>Restart
-                                        Proxy</Button>
-                                </form>
-                            </div>
-                        )}
-                    </div>
+                        </form>
+                    )}
                 </div>
-            </div>
-        </>
+            </section>
+
+            {userInfo.admin === true ? (
+                <section className="panel panel-section">
+                    <div className="stack-sm">
+                        <h2 className="text-xl font-semibold">Admin</h2>
+                        <form className="stack-md" onSubmit={saveProxyUrl}>
+                            <label className="field">
+                                <span className="field-label">Proxy URL</span>
+                                <input
+                                    className="input"
+                                    placeholder="https://example.com"
+                                    value={vessylProxyUrl}
+                                    onChange={(e) => setVessylProxyUrl(e.target.value)}
+                                />
+                            </label>
+                            <div className="page-actions">
+                                <button className="button button-primary" type="submit">Save proxy URL</button>
+                            </div>
+                        </form>
+
+                        <form className="stack-md" onSubmit={restartProxyBtn}>
+                            <div className="field">
+                                <span className="field-label">Proxy restart</span>
+                                <span className="field-note">Restart the proxy after DNS or config changes.</span>
+                            </div>
+                            <div className="page-actions">
+                                <button className="button button-danger" type="submit">Restart proxy</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            ) : null}
+        </div>
     )
 }

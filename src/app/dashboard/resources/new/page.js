@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {Button, Input, Select, SelectItem} from "@nextui-org/react";
-import Sidebar from "@/components/sb/Sidebar";
 import {newResource} from "@/funcs/client/resources";
+import {sanitizeResourceName} from "@/lib/resource-utils";
+import PageHeader from "@/components/PageHeader";
 
 export default function NewResource() {
     const router = useRouter();
@@ -17,10 +17,8 @@ export default function NewResource() {
     const buildTools = ["nixpacks", "dockerfile"];
 
     async function createResource() {
-        console.log(resourceName, repo, buildTool);
         setLoading(true);
         const data = await newResource(resourceName, repo, buildTools[buildTool]);
-        console.log(data);
         if (data.error) {
             setLoading(false);
             setError(data.error);
@@ -30,55 +28,55 @@ export default function NewResource() {
     }
 
     return (
-        <>
-        <Sidebar/>
-        <div className={"p-6"}>
-            <h1 className={"text-3xl font-bold"}>New Resource</h1>
-            <div className={"mt-5"}>
-                <p className={"text-lg"}>Create a new resource to deploy an app.</p>
-                {error && (
-                    <p className={"text-red-500 mt-2"}>{error}</p>
-                )}
-            </div>
-            {!loading && (
-                <form className={"mt-5"} onSubmit={(e) => {
+        <div className="page-stack">
+            <PageHeader title="New resource" note="Add the repository and build method Vessyl should use for deployments." />
+            <section className="panel">
+                {error ? <div className="notice notice-danger">{error}</div> : null}
+                <form className="stack-md" onSubmit={(e) => {
                     e.preventDefault();
                     createResource()
                 }}>
-                    <h2 className={"text-xl font-bold"}>Resource Name</h2>
-                    <Input placeholder={"my-resource-1"} className={"mt-2"} value={resourceName} onChange={(e) => {
-                        const value = e.target.value;
-                        const lowerCaseValue = value.toLowerCase();
-                        const noSpacesValue = lowerCaseValue.replace(/\s+/g, '-');
-                        const cleanValue = noSpacesValue.replace(/[^a-z0-9-]/g, '');
-                        setResourceName(cleanValue);
-                    }}/>
-                    <h2 className={"text-xl font-bold mt-5"}>GitHub Repository</h2>
-                    <Input placeholder={"username/repository"} className={"mt-2"} value={repo} onChange={(e) => {
-                        setRepo(e.target.value)
-                    }}/>
-                    <h2 className={"text-xl font-bold mt-5"}>Build Tool</h2>
-                    <Select
-                        placeholder="Select build tool"
-                        className={"mt-2"}
-                        selectedKeys={[buildTool]}
-                        onChange={(e) => {
-                            setBuildTool(e.target.value)
-                        }}
-                    >
-                        {buildTools.map((tool, index) => (
-                            <SelectItem key={index} value={tool}>{tool}</SelectItem>
-                        ))}
-                    </Select>
-                    <Button color={"success"} className={"mt-5"} type={"submit"}>Create Resource</Button>
+                    <label className="field">
+                        <span className="field-label">Resource name</span>
+                        <input
+                            className="input"
+                            placeholder="my-resource"
+                            value={resourceName}
+                            onChange={(e) => setResourceName(sanitizeResourceName(e.target.value))}
+                        />
+                        <span className="field-note">Lowercase letters, numbers, and dashes only.</span>
+                    </label>
+
+                    <label className="field">
+                        <span className="field-label">GitHub repository</span>
+                        <input
+                            className="input"
+                            placeholder="username/repository"
+                            value={repo}
+                            onChange={(e) => setRepo(e.target.value)}
+                        />
+                    </label>
+
+                    <label className="field">
+                        <span className="field-label">Build tool</span>
+                        <select
+                            className="select"
+                            value={buildTool}
+                            onChange={(e) => setBuildTool(e.target.value)}
+                        >
+                            {buildTools.map((tool, index) => (
+                                <option key={tool} value={index}>{tool}</option>
+                            ))}
+                        </select>
+                    </label>
+
+                    <div className="page-actions">
+                        <button className="button button-primary" disabled={loading} type="submit">
+                            {loading ? "Creating…" : "Create resource"}
+                        </button>
+                    </div>
                 </form>
-            )}
-            {loading && (
-                <div className={"mt-5"}>
-                    <p>Loading...</p>
-                </div>
-            )}
+            </section>
         </div>
-        </>
     )
 }

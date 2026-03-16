@@ -1,12 +1,10 @@
 "use client";
 
-import Sidebar from "@/components/sb/Sidebar";
 import {getResources} from "@/funcs/client/resources";
 import {useEffect, useState} from "react";
-import ResourceCardSkeleton from "@/components/skeletons/ResourceCardSkeleton";
-import ResourceCard from "@/components/ResourceCard";
-import {Skeleton, Button} from "@nextui-org/react";
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
+import StatusBadge from "@/components/StatusBadge";
 
 export default function Resources() {
     const [resources, setResources] = useState([]);
@@ -16,47 +14,57 @@ export default function Resources() {
         async function fetchData() {
             const data = await getResources();
             setResources(data);
-            console.log(data);
             setLoading(false);
         }
         fetchData();
     }, []);
 
     return (
-        <>
-            <Sidebar/>
-            <div className={"p-6"}>
-                <div className={"flex"}>
-                    <h1 className={"text-3xl font-bold"}>Resources</h1>
-                    <div>
-                        <Link href={"/dashboard/resources/new"}>
-                            <Button color={"warning"} className={"ml-3"}>Add Resource</Button>
-                        </Link>
-                    </div>
-                </div>
-                <div className={"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-5 overflow-y-auto max-h-[82vh]"}>
+        <div className="page-stack">
+            <PageHeader
+                title="Resources"
+                note="Resources store repository and deployment settings before they become running containers."
+                actions={<Link href="/dashboard/resources/new" className="button button-primary">Add resource</Link>}
+            />
+
+            <section className="panel">
                 {loading ? (
-                    <>
-                        <Skeleton>
-                            <ResourceCardSkeleton/>
-                        </Skeleton>
-                        <Skeleton>
-                            <ResourceCardSkeleton/>
-                        </Skeleton>
-                        <Skeleton>
-                            <ResourceCardSkeleton/>
-                        </Skeleton>
-                        <Skeleton>
-                            <ResourceCardSkeleton/>
-                        </Skeleton>
-                    </>
+                    <div className="notice">Loading resources…</div>
+                ) : resources.length === 0 ? (
+                    <div className="notice">No resources yet.</div>
                 ) : (
-                    resources.map((resource, index) => (
-                        <ResourceCard key={index} resource={resource}/>
-                    ))
+                    <div className="table-wrap">
+                        <table className="data-table">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Repository</th>
+                                <th>Build</th>
+                                <th>Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {resources.map((resource) => (
+                                <tr key={resource.name}>
+                                    <td>
+                                        <Link className="list-link" href={`/dashboard/resources/${resource.name}`}>
+                                            {resource.name}
+                                        </Link>
+                                    </td>
+                                    <td>{resource.git_url}</td>
+                                    <td>{resource.type}</td>
+                                    <td>
+                                        <StatusBadge tone={resource.container?.running ? "success" : "danger"}>
+                                            {resource.container?.running ? "Running" : "Stopped"}
+                                        </StatusBadge>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
-            </div>
-            </div>
-        </>
+            </section>
+        </div>
     )
 }

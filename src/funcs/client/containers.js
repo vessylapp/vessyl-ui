@@ -1,73 +1,21 @@
-export async function getContainers() {
-    const response = await fetch("/api/getContainers", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token: localStorage.getItem("token")
-        })
-    });
-    const data = await response.json();
-    return data;
+import { postJson, postText, withToken } from "@/lib/client-api";
+
+export function getContainers() {
+    return postJson("/api/getContainers", withToken());
 }
 
-export async function getContainer(name) {
-    const response = await fetch("/api/getContainer", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token: localStorage.getItem("token"),
-            name
-        })
-    });
-    const data = await response.json();
-    return data;
+export function getContainer(name) {
+    return postJson("/api/getContainer", withToken({ name }));
 }
 
-export async function containerLogs(name) {
-    const response = await fetch("/api/containerLogs", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token: localStorage.getItem("token"),
-            name
-        })
-    });
-    const data = await response.text();
-    return data;
+export function containerLogs(name) {
+    return postText("/api/containerLogs", withToken({ name }));
 }
 
-export async function startContainer(name) {
-    const response = await fetch("/api/startContainer", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token: localStorage.getItem("token"),
-            name
-        })
-    });
-    const data = await response.text();
-    return data;
+export function startContainer(name) {
+    return postText("/api/startContainer", withToken({ name }));
 }
 
-export async function stopContainer(name) {
-    const response = await fetch("/api/stopContainer", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token: localStorage.getItem("token"),
-            name
-        })
-    });
-    const data = await response.text();
-    return data;
+export function stopContainer(name) {
+    return postText("/api/stopContainer", withToken({ name }));
 }

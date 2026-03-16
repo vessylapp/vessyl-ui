@@ -1,20 +1,13 @@
-import {config} from "dotenv";
-
-config();
+import { workerRequest } from "@/lib/server-api";
 
 export async function status(vers = "") {
-    let toAdd = ``;
+    let toAdd = "";
     if(vers !== "") {
         toAdd = `?cv=${vers}`;
     }
-    const response = await fetch(process.env.API_URL + "/status" + toAdd, {
+    return workerRequest("/status" + toAdd, {
         method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
     });
-    const data = await response.json();
-    return data;
 }
 
 export async function checkForUpdates() {
