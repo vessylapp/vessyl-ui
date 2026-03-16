@@ -20,7 +20,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^16.4.5",
     "framer-motion": "^11.2.11",
-    "next": "^14.2.33",
+    "next": "^16.1.6",
     "node-fetch": "^3.3.2",
     "react": "^18",
     "react-dom": "^18",
