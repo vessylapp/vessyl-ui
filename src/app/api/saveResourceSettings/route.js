@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 export async function POST(request) {
     const body = await request.json();
     const bodyToGive = {};
-    if (body.env) {
+    if (body.env !== undefined) {
         bodyToGive.env = body.env;
     }
     if (body.network) {

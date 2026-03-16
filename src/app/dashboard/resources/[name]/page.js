@@ -5,7 +5,7 @@ import Link from "next/link";
 import {useParams, useRouter} from "next/navigation";
 import {deleteResource, getResource} from "@/funcs/client/resources";
 import {getToken, postJson, withToken} from "@/lib/client-api";
-import {formatListField, parseListField} from "@/lib/resource-utils";
+import {formatListField, normalizeEnvPairs, parseListField} from "@/lib/resource-utils";
 import PageHeader from "@/components/PageHeader";
 import StatusBadge from "@/components/StatusBadge";
 
@@ -17,7 +17,7 @@ export default function Resource() {
 
     const [showOverview, setShowOverview] = useState(true);
     const [resourceInfo, setResourceInfo] = useState(null);
-    const [envVariables, setEnvVariables] = useState("");
+    const [envRows, setEnvRows] = useState([]);
     const [network, setNetwork] = useState("");
     const [ports, setPorts] = useState("");
     const [volumes, setVolumes] = useState("");
@@ -43,7 +43,7 @@ export default function Resource() {
         }
 
         setResourceInfo(data);
-        setEnvVariables(formatListField(data.env));
+        setEnvRows(normalizeEnvPairs(data.env));
         setNetwork(data.network || "");
         setPorts(formatListField(data.ports));
         setVolumes(formatListField(data.volumes));
@@ -74,11 +74,17 @@ export default function Resource() {
             reload,
         };
 
-        const envList = parseListField(envVariables);
         const portList = parseListField(ports);
         const volumeList = parseListField(volumes);
 
-        if (envList.length) body.env = envList;
+        const envList = envRows
+            .map((entry) => ({
+                key: String(entry.key ?? "").trim(),
+                value: String(entry.value ?? "").trim(),
+            }))
+            .filter((entry) => entry.key);
+
+        body.env = envList;
         if (network) body.network = network;
         if (portList.length) body.ports = portList;
         if (volumeList.length) body.volumes = volumeList;
@@ -144,6 +150,27 @@ export default function Resource() {
         setDeployStream((current) => `${current}\nDeployment finished. Redirecting to the container page…`);
         await new Promise((resolve) => setTimeout(resolve, 2500));
         router.push(`/dashboard/containers/${resourceName}`);
+    }
+
+    function addEnvRow() {
+        setEnvRows((current) => [...current, { key: "", value: "" }]);
+    }
+
+    function updateEnvRow(index, field, value) {
+        setEnvRows((current) => current.map((entry, entryIndex) => {
+            if (entryIndex !== index) {
+                return entry;
+            }
+
+            return {
+                ...entry,
+                [field]: value,
+            };
+        }));
+    }
+
+    function removeEnvRow(index) {
+        setEnvRows((current) => current.filter((_, entryIndex) => entryIndex !== index));
     }
 
     if (isLoading) {
@@ -216,15 +243,40 @@ export default function Resource() {
 
                     <section className="panel panel-section">
                         <h2 className="text-xl font-semibold">Runtime configuration</h2>
-                        <div className="meta-list">
-                            <span className="meta-label">Environment</span>
-                            <span>{envVariables || "None"}</span>
-                            <span className="meta-label">Ports</span>
-                            <span>{ports || "None"}</span>
-                            <span className="meta-label">Volumes</span>
-                            <span>{volumes || "None"}</span>
-                            <span className="meta-label">Network</span>
-                            <span>{network || "Default"}</span>
+                        <div className="stack-md">
+                            <div>
+                                <div className="meta-label">Environment</div>
+                                <div className="table-wrap">
+                                    <table className="data-table">
+                                        <thead>
+                                        <tr>
+                                            <th>Key</th>
+                                            <th>Value</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {envRows.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="2">No environment variables configured.</td>
+                                            </tr>
+                                        ) : envRows.map((entry, index) => (
+                                            <tr key={`${index}-${entry.key}`}>
+                                                <td>{entry.key}</td>
+                                                <td>{entry.value || " "}</td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div className="meta-list">
+                                <span className="meta-label">Ports</span>
+                                <span>{ports || "None"}</span>
+                                <span className="meta-label">Volumes</span>
+                                <span>{volumes || "None"}</span>
+                                <span className="meta-label">Network</span>
+                                <span>{network || "Default"}</span>
+                            </div>
                         </div>
                     </section>
                 </div>
@@ -232,7 +284,7 @@ export default function Resource() {
                 <section className="panel">
                     <form className="stack-md" onSubmit={saveSettings}>
                         <div className="notice">
-                            Use commas to separate multiple values for environment variables, ports, or volumes.
+                            Use commas to separate multiple values for ports or volumes. Environment variables are stored as key/value pairs.
                         </div>
                         <label className="field">
                             <span className="field-label">Name</span>
@@ -246,10 +298,58 @@ export default function Resource() {
                             <span className="field-label">Base directory</span>
                             <input className="input" value={baseDir} onChange={(e) => setBaseDir(e.target.value)} />
                         </label>
-                        <label className="field">
-                            <span className="field-label">Environment variables</span>
-                            <textarea className="textarea" value={envVariables} onChange={(e) => setEnvVariables(e.target.value)} />
-                        </label>
+                        <div className="field">
+                            <div className="page-actions">
+                                <span className="field-label">Environment variables</span>
+                                <button className="button button-success button-small" onClick={addEnvRow} type="button">
+                                    +
+                                </button>
+                            </div>
+                            <div className="table-wrap">
+                                <table className="data-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Key</th>
+                                        <th>Value</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {envRows.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="3">No environment variables configured.</td>
+                                        </tr>
+                                    ) : envRows.map((entry, index) => (
+                                        <tr key={`${index}-${entry.key}`}>
+                                            <td>
+                                                <input
+                                                    className="input table-input"
+                                                    value={entry.key}
+                                                    onChange={(e) => updateEnvRow(index, "key", e.target.value)}
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    className="input table-input"
+                                                    value={entry.value}
+                                                    onChange={(e) => updateEnvRow(index, "value", e.target.value)}
+                                                />
+                                            </td>
+                                            <td>
+                                                <button
+                                                    className="button button-danger button-small"
+                                                    onClick={() => removeEnvRow(index)}
+                                                    type="button"
+                                                >
+                                                    -
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                         <label className="field">
                             <span className="field-label">Network</span>
                             <input className="input" value={network} onChange={(e) => setNetwork(e.target.value)} />
